@@ -6,6 +6,7 @@ import { InboxesService } from '../inboxes/inboxes.service';
 import { InboxProvider } from '../inboxes/dto/inbox.dto';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 import { SecurityService } from '../security/security.service';
+import { TransactionalEmailService } from '../notifications/transactional-email.service';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 import { Buffer } from 'buffer';
@@ -21,6 +22,7 @@ export class AuthService {
     private readonly inboxesService: InboxesService,
     private readonly securityService: SecurityService,
     private readonly configService: ConfigService,
+    private readonly transactionalEmailService: TransactionalEmailService,
   ) { }
 
   async register(dto: RegisterDto) {
@@ -38,6 +40,15 @@ export class AuthService {
       { name: dto.workspaceName },
       user.id
     );
+
+    // Generate Verification Token
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    await (this.usersService as any).update(user.id, {
+      verificationToken
+    });
+
+    // Send Verification Email
+    await this.transactionalEmailService.sendVerificationEmail(user.email, verificationToken);
 
     const token = this.generateJwt(user.id, workspace.id);
 
@@ -177,5 +188,57 @@ export class AuthService {
       .digest('base64url');
 
     return `${header}.${payload}.${signature}`;
+  }
+
+  async verifyEmail(token: string) {
+    const user = await (this.usersService as any).prisma.user.findUnique({
+      where: { verificationToken: token }
+    });
+
+    if (!user) throw new UnauthorizedException('Invalid or expired verification token');
+
+    await (this.usersService as any).update(user.id, {
+      emailVerifiedAt: new Date(),
+      verificationToken: null,
+    });
+
+    return { success: true };
+  }
+
+  async initiatePasswordReset(email: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) return { success: true }; // Silent fail for security
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenExpires = new Date(Date.now() + 3600000); // 1 hour
+
+    await (this.usersService as any).update(user.id, {
+      resetToken,
+      resetTokenExpires,
+    });
+
+    await this.transactionalEmailService.sendPasswordResetEmail(user.email, resetToken);
+
+    return { success: true };
+  }
+
+  async resetPassword(token: string, dto: any) {
+    const user = await (this.usersService as any).prisma.user.findUnique({
+      where: { resetToken: token }
+    });
+
+    if (!user || !user.resetTokenExpires || user.resetTokenExpires < new Date()) {
+      throw new UnauthorizedException('Invalid or expired reset token');
+    }
+
+    const passwordHash = await this.securityService.hashPassword(dto.password);
+
+    await (this.usersService as any).update(user.id, {
+      passwordHash,
+      resetToken: null,
+      resetTokenExpires: null,
+    });
+
+    return { success: true };
   }
 }

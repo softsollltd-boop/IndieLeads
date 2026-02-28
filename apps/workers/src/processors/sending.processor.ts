@@ -35,31 +35,32 @@ export class SendingProcessor implements OnModuleInit {
   }
 
   async process(job: Job) {
-    const { logId, inboxId, leadId, email } = job.data;
+    const { logId, inboxId, leadId, email, trackOpens = true, trackClicks = false } = job.data;
 
     const hasLock = await this.lockService.acquireLock(inboxId, 30);
     if (!hasLock) throw new Error('Inbox locked by another worker');
 
     try {
-      const inbox = await (this.prisma as any).inbox.findUnique({ where: { id: inboxId } });
+      const inbox = await this.prisma.inbox.findUnique({ where: { id: inboxId } });
       if (!inbox || inbox.status !== 'active') {
         this.logger.warn(`Inbox ${inboxId} is not active. Skipping job ${job.id}`);
         return;
       }
 
       // CRITICAL: Check if lead is unsubscribed or replied before sending
-      const lead = await (this.prisma as any).lead.findUnique({
+      const lead = await this.prisma.lead.findUnique({
         where: { id: leadId },
         include: { campaign: true }
       });
 
       const isUnsubscribed = lead?.status === LeadStatus.UNSUBSCRIBED;
       const isReplied = lead?.status === LeadStatus.REPLIED;
-      const stopOnReply = lead?.campaign?.settings?.stopOnReply ?? true;
+      const settings = (lead?.campaign?.settings as any) || {};
+      const stopOnReply = settings.stopOnReply ?? true;
 
       if (!lead || isUnsubscribed || (isReplied && stopOnReply)) {
         this.logger.warn(`Lead ${leadId} skipped (Status: ${lead?.status}, StopOnReply: ${stopOnReply})`);
-        await (this.prisma as any).sendingLog.update({
+        await this.prisma.sendingLog.update({
           where: { id: logId },
           data: {
             status: 'skipped',
@@ -71,15 +72,55 @@ export class SendingProcessor implements OnModuleInit {
 
       const creds = await this.inboxesService.getDecryptedCredentials(inboxId);
 
-      // Execute Sending
-      const result = await this.smtpAdapter.sendEmail(creds, {
+      // 1. Append inbox signature to email body
+      const signature = (inbox as any).signature;
+      let bodyWithSignature = signature
+        ? `${email.body}<br/><br/>--<br/>${signature}`
+        : email.body;
+
+      // 2. Automated Tracking & Unsubscribe Injection
+      const apiUrl = this.configService.get<string>('API_URL') || 'https://api.skyreach.ai';
+      const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'https://app.skyreach.ai';
+
+      let finalBody = bodyWithSignature;
+
+      // Inject Open Tracking Pixel
+      if (trackOpens) {
+        const pixelUrl = `${apiUrl}/t/o/${logId}`;
+        finalBody += `<img src="${pixelUrl}" width="1" height="1" style="display:none" alt="" />`;
+      }
+
+      // Inject Click Tracking (Rewrite Links)
+      if (trackClicks) {
+        const linkRegex = /<a\s+(?:[^>]*?\s+)?href="([^"]*)"/gi;
+        finalBody = finalBody.replace(linkRegex, (match, url) => {
+          if (url.startsWith('mailto:') || url.startsWith('#') || url.includes('/unsub/')) return match;
+          const encodedUrl = Buffer.from(url).toString('base64url');
+          const trackingUrl = `${apiUrl}/t/c/${logId}?r=${encodedUrl}`;
+          return match.replace(url, trackingUrl);
+        });
+      }
+
+      // Inject Unsubscribe Link (if not already present)
+      if (!finalBody.includes('/unsub/')) {
+        const unsubUrl = `${frontendUrl}/#/unsub/${leadId}`;
+        const settings = (lead?.campaign?.settings as any) || {};
+        const unsubText = settings.unsubscribeText || 'Unsubscribe';
+        finalBody += `<br/><br/><div style="font-size: 11px; color: #94a3b8; text-align: center;"><a href="${unsubUrl}" style="color: #94a3b8; text-decoration: underline;">${unsubText}</a></div>`;
+      }
+
+      // Execute Sending — inject X-SkyReach-Log-Id for reply correlation
+      await this.smtpAdapter.sendEmail(creds, {
         to: email.to,
+        fromName: inbox.fromName || 'SkyReach',
         subject: email.subject,
-        body: email.body,
+        body: finalBody,
+        logId,           // Written into X-SkyReach-Log-Id header for IMAP reply matching
+        leadId,
       });
 
       // Update Database
-      await (this.prisma as any).sendingLog.update({
+      await this.prisma.sendingLog.update({
         where: { id: logId },
         data: {
           status: 'sent',
@@ -87,7 +128,7 @@ export class SendingProcessor implements OnModuleInit {
         }
       });
 
-      await (this.prisma as any).lead.update({
+      await this.prisma.lead.update({
         where: { id: leadId },
         data: { status: LeadStatus.SENT }
       });
@@ -97,7 +138,7 @@ export class SendingProcessor implements OnModuleInit {
     } catch (err) {
       this.logger.error(`[Job ${job.id}] Failed: ${err.message}`);
 
-      await (this.prisma as any).sendingLog.update({
+      await this.prisma.sendingLog.update({
         where: { id: logId },
         data: {
           status: 'failed',

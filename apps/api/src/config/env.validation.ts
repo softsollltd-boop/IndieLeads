@@ -10,10 +10,12 @@ enum Environment {
 }
 
 class EnvironmentVariables {
+  @IsOptional()
   @IsEnum(Environment)
-  NODE_ENV: Environment;
+  NODE_ENV: Environment = Environment.Development;
 
   @IsNumber()
+  @IsOptional()
   PORT: number = 3000;
 
   @IsString()
@@ -28,6 +30,10 @@ class EnvironmentVariables {
   @IsOptional()
   @IsString()
   API_KEY?: string;
+
+  @IsOptional()
+  @IsString()
+  FRONTEND_URL?: string;
 }
 
 export function validate(config: Record<string, unknown>) {

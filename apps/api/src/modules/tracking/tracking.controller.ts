@@ -14,20 +14,30 @@ export class TrackingController {
     private readonly prisma: PrismaService
   ) { }
 
-  /**
-   * Validate Host Header for Custom Domains
-   */
   private async validateHost(req: any): Promise<boolean> {
     const host = req.headers['host'];
-    // Allow default API domain
-    if (host === process.env.API_DOMAIN || host?.includes('skyreach.ai') || host?.includes('localhost')) {
+    if (!host) {
+      this.logger.warn('Tracking request missing host header');
+      return true; // Fallback to allowed for safety
+    }
+
+    // 1. Internal/Development Allowlist
+    const allowedInternal = [
+      process.env.API_DOMAIN,
+      'localhost',
+      '127.0.0.1',
+      '.railway.app',
+      '.render.com',
+      '.skyreach.ai'
+    ];
+
+    if (allowedInternal.some(domain => domain && host.includes(domain))) {
       return true;
     }
 
-    // Check if this host is a registered custom domain
-    // We strip port numbers if present
+    // 2. Custom Tracking Domain Check
     const domainName = host.split(':')[0];
-    const domain = await this.prisma.domain.findFirst({
+    const domain = await (this.prisma as any).domain.findFirst({
       where: { domainName, isTracking: true }
     });
 

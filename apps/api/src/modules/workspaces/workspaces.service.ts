@@ -4,11 +4,11 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class WorkspacesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async create(dto: { name: string }, userId: string) {
     const slug = dto.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-    
+
     // Check for slug collision
     // Fix: Access 'workspace' with type assertion to resolve Prisma member resolution issues
     const existing = await (this.prisma as any).workspace.findUnique({ where: { slug } });
@@ -49,7 +49,7 @@ export class WorkspacesService {
     });
 
     if (!member) throw new ForbiddenException('Access denied to workspace');
-    
+
     // Fix: Access 'workspace' with type assertion to resolve Prisma member resolution issues
     return (this.prisma as any).workspace.findUnique({ where: { id: workspaceId } });
   }
@@ -60,5 +60,12 @@ export class WorkspacesService {
       where: { userId, workspaceId }
     });
     return count > 0;
+  }
+
+  async update(id: string, data: any) {
+    return (this.prisma as any).workspace.update({
+      where: { id },
+      data
+    });
   }
 }

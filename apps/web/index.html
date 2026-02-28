@@ -1,28 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SkyReach Enterprise SaaS</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <style>
-        :root { --glass-blur: 16px; }
-        body { font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
-        .font-heading { font-family: 'Outfit', sans-serif !important; }
-        .theme-ethereal { background: radial-gradient(circle at 20% 20%, #e0f2fe 0%, #ffffff 50%, #f0fdf4 100%); color: #334155; }
-        .theme-ethereal .glass-surface { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(var(--glass-blur)); border: 1px solid rgba(255, 255, 255, 0.8); }
-        .theme-glass { background: radial-gradient(circle at 50% 50%, #0f172a, #000000); color: #f8fafc; }
-        .theme-glass .glass-surface { background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .btn-primary { padding: 0.75rem 1.5rem; border-radius: 1rem; font-weight: 800; transition: all 0.2s; cursor: pointer; }
-        .theme-ethereal .btn-primary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
-        .theme-glass .btn-primary { background: #00E5FF; color: #0f172a; }
-        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            background: #f8fafc;
+            color: #334155;
+        }
+
+        .font-heading {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+        }
+
+        .theme-ethereal {
+            background: #f8fafc;
+            color: #334155;
+        }
+
+        .theme-ethereal .glass-surface {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            background: #0f172a;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #334155;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
     </style>
 </head>
+
 <body class="theme-ethereal">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
 </body>
+
 </html>

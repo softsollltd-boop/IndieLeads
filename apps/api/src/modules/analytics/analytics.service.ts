@@ -18,42 +18,46 @@ export class AnalyticsService {
     });
 
     return {
-      sent: logs.find(l => l.status === 'sent')?._count || 0,
-      failed: logs.find(l => l.status === 'failed')?._count || 0,
+      sent: logs.find((l: any) => l.status === 'sent')?._count || 0,
+      failed: logs.find((l: any) => l.status === 'failed')?._count || 0,
+      bounced: logs.find((l: any) => l.status === 'bounced')?._count || 0,
+      spamComplaint: logs.find((l: any) => l.status === 'spam_complaint')?._count || 0,
       replies,
     };
   }
 
+  /**
+   * 7-day rolling window of sent + replies.
+   * Returns daily buckets for the area chart on Dashboard/Analytics.
+   */
   async getGlobalPulse(workspaceId: string) {
     const last7Days = new Date();
     last7Days.setDate(last7Days.getDate() - 7);
     last7Days.setHours(0, 0, 0, 0);
 
-    // Aggregate SendingLogs in DB
-    const logStats = await (this.prisma as any).sendingLog.groupBy({
-      by: ['sentAt'],
-      where: {
-        workspaceId,
-        sentAt: { gte: last7Days },
-        status: 'sent'
-      },
-      _count: true
-    });
-
-    // Aggregate ReplyLogs in DB
-    const replyStats = await (this.prisma as any).replyLog.groupBy({
-      by: ['receivedAt'],
-      where: {
-        workspaceId,
-        receivedAt: { gte: last7Days }
-      },
-      _count: true
-    });
+    const [logStats, replyStats] = await Promise.all([
+      (this.prisma as any).sendingLog.groupBy({
+        by: ['sentAt'],
+        where: {
+          workspaceId,
+          sentAt: { gte: last7Days },
+          status: 'sent',
+        },
+        _count: true,
+      }),
+      (this.prisma as any).replyLog.groupBy({
+        by: ['receivedAt'],
+        where: {
+          workspaceId,
+          receivedAt: { gte: last7Days },
+        },
+        _count: true,
+      }),
+    ]);
 
     const stats = new Map<string, { sent: number; replies: number }>();
 
-    // Initialize map
-    for (let i = 0; i < 7; i++) {
+    for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().split('T')[0];
@@ -79,7 +83,79 @@ export class AnalyticsService {
     return Array.from(stats.entries()).map(([date, data]) => ({
       name: new Date(date).toLocaleDateString('en-US', { weekday: 'short' }),
       date,
-      ...data
-    })).reverse();
+      ...data,
+    }));
+  }
+
+  /**
+   * Aggregate reply sentiment breakdown for the workspace (30d).
+   * Used by the Analytics page pie chart.
+   */
+  async getReplySentiment(workspaceId: string) {
+    const last30Days = new Date();
+    last30Days.setDate(last30Days.getDate() - 30);
+
+    const sentimentGroups = await (this.prisma as any).replyLog.groupBy({
+      by: ['classification'],
+      where: {
+        workspaceId,
+        receivedAt: { gte: last30Days },
+      },
+      _count: true,
+    });
+
+    const labelMap: Record<string, string> = {
+      interested: 'Interested',
+      neutral: 'Neutral',
+      not_interested: 'Not Interested',
+      unsubscribe: 'Unsubscribe',
+      out_of_office: 'Out of Office',
+    };
+
+    return sentimentGroups.map((g: any) => ({
+      name: labelMap[g.classification] || g.classification || 'Unknown',
+      value: g._count,
+    }));
+  }
+
+  /**
+   * Per-campaign performance summary, sorted by sent volume.
+   * Used by the Analytics page performance audit table.
+   */
+  async getCampaignPerformanceTable(workspaceId: string) {
+    const campaigns = await this.prisma.campaign.findMany({
+      where: { workspaceId },
+      select: {
+        id: true,
+        name: true,
+        status: true,
+        createdAt: true,
+        sequences: { select: { id: true, subject: true, order: true }, orderBy: { order: 'asc' } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+    });
+
+    const results = await Promise.all(
+      campaigns.map(async (campaign) => {
+        const stats = await this.getCampaignStats(campaign.id);
+        const total = stats.sent + stats.failed + stats.bounced;
+        const replyRate = total > 0 ? ((stats.replies / total) * 100).toFixed(1) : '0.0';
+        const bounceRate = total > 0 ? (((stats.bounced + stats.spamComplaint) / total) * 100).toFixed(1) : '0.0';
+
+        return {
+          id: campaign.id,
+          name: campaign.name,
+          status: campaign.status,
+          steps: campaign.sequences.length,
+          ...stats,
+          total,
+          replyRate: parseFloat(replyRate),
+          bounceRate: parseFloat(bounceRate),
+        };
+      })
+    );
+
+    return results;
   }
 }

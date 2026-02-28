@@ -9,7 +9,7 @@ export class CampaignsService {
   constructor(private readonly prisma: PrismaService) { }
 
   async create(workspaceId: string, dto: CreateCampaignDto) {
-    return (this.prisma as any).campaign.create({
+    return this.prisma.campaign.create({
       data: {
         workspaceId,
         name: dto.name,
@@ -46,7 +46,7 @@ export class CampaignsService {
     }
 
     const [data, total] = await Promise.all([
-      (this.prisma as any).campaign.findMany({
+      this.prisma.campaign.findMany({
         where,
         skip,
         take: limit,
@@ -60,7 +60,7 @@ export class CampaignsService {
         },
         orderBy: { createdAt: 'desc' }
       }),
-      (this.prisma as any).campaign.count({ where })
+      this.prisma.campaign.count({ where })
     ]);
 
     return {
@@ -75,7 +75,7 @@ export class CampaignsService {
   }
 
   async findOne(workspaceId: string, id: string) {
-    const campaign = await (this.prisma as any).campaign.findFirst({
+    const campaign = await this.prisma.campaign.findFirst({
       where: { id, workspaceId },
       include: { sequences: { orderBy: { order: 'asc' } } }
     });
@@ -85,7 +85,7 @@ export class CampaignsService {
   }
 
   async update(workspaceId: string, id: string, dto: UpdateCampaignDto) {
-    return (this.prisma as any).campaign.update({
+    return this.prisma.campaign.update({
       where: { id },
       data: { ...dto, updatedAt: new Date() }
     });
@@ -93,7 +93,7 @@ export class CampaignsService {
 
   async updateSequence(workspaceId: string, id: string, steps: any[]) {
     // Transactional update: delete old steps and create new ones
-    return (this.prisma as any).$transaction(async (tx: any) => {
+    return this.prisma.$transaction(async (tx) => {
       await tx.sequenceStep.deleteMany({ where: { campaignId: id } });
 
       const createdSteps = await Promise.all(
@@ -116,7 +116,7 @@ export class CampaignsService {
   }
 
   async remove(workspaceId: string, id: string) {
-    return (this.prisma as any).campaign.delete({
+    return this.prisma.campaign.delete({
       where: { id, workspaceId }
     });
   }

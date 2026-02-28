@@ -8,9 +8,16 @@ import { parse } from 'csv-parse';
 export class LeadsService {
   constructor(private readonly prisma: PrismaService) { }
 
+  /**
+   * Retrieves leads with optional filtering and search.
+   */
   async findAll(workspaceId: string, filters: { status?: string; search?: string }) {
     const where: any = { workspaceId };
-    if (filters.status) where.status = filters.status;
+
+    if (filters.status) {
+      where.status = filters.status;
+    }
+
     if (filters.search) {
       where.OR = [
         { email: { contains: filters.search, mode: 'insensitive' } },
@@ -18,11 +25,18 @@ export class LeadsService {
         { company: { contains: filters.search, mode: 'insensitive' } },
       ];
     }
-    return (this.prisma as any).lead.findMany({ where, orderBy: { createdAt: 'desc' } });
+
+    return this.prisma.lead.findMany({
+      where,
+      orderBy: { createdAt: 'desc' }
+    });
   }
 
+  /**
+   * Creates a single lead.
+   */
   async create(workspaceId: string, dto: CreateLeadDto) {
-    return (this.prisma as any).lead.create({
+    return this.prisma.lead.create({
       data: {
         workspaceId,
         email: dto.email,
@@ -36,8 +50,10 @@ export class LeadsService {
     });
   }
 
+  /**
+   * Bulk imports leads with deduplication.
+   */
   async importLeads(workspaceId: string, dto: ImportLeadsDto) {
-    // Lead Mapping Logic: Maps custom CSV columns to Lead entity
     const leadsToCreate = dto.leads.map(leadData => ({
       workspaceId,
       campaignId: dto.campaignId || null,
@@ -50,14 +66,17 @@ export class LeadsService {
       customFields: leadData.customFields || {},
     }));
 
-    const result = await (this.prisma as any).lead.createMany({
-      data: leadsToCreate,
+    const result = await this.prisma.lead.createMany({
+      data: (leadsToCreate as any),
       skipDuplicates: true,
     });
 
     return { success: true, count: result.count };
   }
 
+  /**
+   * Parses CSV content and maps it to system fields using a custom mapper.
+   */
   async parseCsvWithMapping(csvContent: string, mapping: Record<string, string>): Promise<Partial<CreateLeadDto>[]> {
     return new Promise((resolve, reject) => {
       parse(csvContent, { columns: true, skip_empty_lines: true, trim: true }, (err, records) => {
@@ -66,7 +85,6 @@ export class LeadsService {
         const mapped = records.map((r: any) => {
           const lead: any = { customFields: {} };
 
-          // Apply User Mapping
           Object.entries(mapping).forEach(([csvHeader, systemField]) => {
             if (['email', 'firstName', 'lastName', 'company'].includes(systemField)) {
               lead[systemField] = r[csvHeader];
@@ -75,7 +93,7 @@ export class LeadsService {
             }
           });
 
-          // Fallback if mapping missing but common headers exist
+          // Basic email fallback
           lead.email = lead.email || r.email || r.Email || r['Email Address'];
 
           return lead;
@@ -86,36 +104,41 @@ export class LeadsService {
     });
   }
 
+  /**
+   * Finds a specific lead by workspace and ID.
+   */
   async findOne(workspaceId: string, id: string) {
-    const lead = await (this.prisma as any).lead.findFirst({ where: { id, workspaceId } });
+    const lead = await this.prisma.lead.findFirst({ where: { id, workspaceId } });
     if (!lead) throw new NotFoundException('Lead not found');
     return lead;
   }
 
-  // FIX: Added missing getTimeline method to retrieve combined history of outbound sends and inbound replies for a lead
+  /**
+   * Generates a unified chronological timeline of all activities for a lead.
+   */
   async getTimeline(workspaceId: string, id: string) {
     await this.findOne(workspaceId, id);
 
     const [sendingLogs, replyLogs] = await Promise.all([
-      (this.prisma as any).sendingLog.findMany({
+      this.prisma.sendingLog.findMany({
         where: { leadId: id, workspaceId },
         orderBy: { createdAt: 'desc' },
       }),
-      (this.prisma as any).replyLog.findMany({
+      this.prisma.replyLog.findMany({
         where: { leadId: id, workspaceId },
         orderBy: { receivedAt: 'desc' },
       }),
     ]);
 
     const events = [
-      ...sendingLogs.map((log: any) => ({
+      ...sendingLogs.map((log) => ({
         id: log.id,
         type: 'outbound',
         status: log.status,
-        createdAt: log.sentAt || log.createdAt,
+        createdAt: (log as any).sentAt || log.createdAt,
         metadata: { campaignId: log.campaignId, stepId: log.stepId },
       })),
-      ...replyLogs.map((log: any) => ({
+      ...replyLogs.map((log) => ({
         id: log.id,
         type: 'inbound',
         status: 'replied',
@@ -127,26 +150,38 @@ export class LeadsService {
     return events.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
+  /**
+   * Updates a lead's status.
+   */
   async updateStatus(workspaceId: string, id: string, status: LeadStatus) {
-    return (this.prisma as any).lead.update({
+    return this.prisma.lead.update({
       where: { id },
       data: { status, lastEventAt: new Date() }
     });
   }
 
+  /**
+   * Bulk updates statuses for multiple leads.
+   */
   async bulkUpdateStatus(workspaceId: string, ids: string[], status: LeadStatus) {
-    return (this.prisma as any).lead.updateMany({
+    return this.prisma.lead.updateMany({
       where: { id: { in: ids }, workspaceId },
       data: { status, lastEventAt: new Date() }
     });
   }
 
+  /**
+   * Removes a single lead.
+   */
   async remove(workspaceId: string, id: string) {
-    return (this.prisma as any).lead.delete({ where: { id, workspaceId } });
+    return this.prisma.lead.delete({ where: { id, workspaceId } });
   }
 
+  /**
+   * Bulk removes multiple leads.
+   */
   async bulkRemove(workspaceId: string, ids: string[]) {
-    return (this.prisma as any).lead.deleteMany({
+    return this.prisma.lead.deleteMany({
       where: { id: { in: ids }, workspaceId }
     });
   }

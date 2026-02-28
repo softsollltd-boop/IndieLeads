@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async create(data: any) {
     // Fix: Access 'user' with type assertion to resolve Prisma member resolution issues
@@ -24,7 +24,13 @@ export class UsersService {
   }
 
   async findById(id: string) {
-    // Fix: Access 'user' with type assertion to resolve Prisma member resolution issues
     return (this.prisma as any).user.findUnique({ where: { id } });
+  }
+
+  async update(id: string, data: any) {
+    return (this.prisma as any).user.update({
+      where: { id },
+      data
+    });
   }
 }

@@ -6,6 +6,8 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { json, urlencoded } from 'express';
 
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
 
@@ -18,29 +20,33 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api/v1', { exclude: ['/'] });
 
+  const corsLogger = new Logger('CORS');
   app.enableCors({
     origin: (origin, callback) => {
+      const frontendUrl = process.env.FRONTEND_URL;
       const allowedOrigins = [
-        process.env.FRONTEND_URL,
         'http://localhost:5173',
+        'http://127.0.0.1:5173',
         'http://localhost:3000',
-      ].filter(Boolean);
+        'http://localhost',
+      ];
 
-      // Allow if no origin (e.g. server-side or same-origin) or if it matches allowedOrigins
-      // Or if the origin ends with vercel.app (convenience for the user)
-      if (!origin || allowedOrigins.includes(origin) || origin.endsWith('vercel.app')) {
+      // Add frontendUrl to allowed if exists
+      if (frontendUrl) allowedOrigins.push(frontendUrl);
+
+      if (!origin || allowedOrigins.includes(origin) || (frontendUrl && origin === frontendUrl)) {
         callback(null, true);
       } else {
-        logger.warn(`Blocked by CORS: ${origin}`);
+        corsLogger.warn(`Blocked Origin: ${origin}`);
         callback(new Error('Not allowed by CORS'));
       }
     },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
-    allowedHeaders: '*',
+    allowedHeaders: 'Content-Type,Accept,Authorization,x-workspace-id,x-request-id',
   });
 
-  app.useGlobalInterceptors(new LoggingInterceptor());
+  app.useGlobalInterceptors(new LoggingInterceptor(), new TransformInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
 
   app.useGlobalPipes(

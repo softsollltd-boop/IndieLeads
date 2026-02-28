@@ -1,9 +1,10 @@
 
 import React, { useState } from 'react';
-import { Users, UserPlus, Copy, Check, Mail, Shield } from 'lucide-react';
+import { Users, UserPlus, Copy, Check, Mail, Shield, Loader2 } from 'lucide-react';
+import apiClient from '../../utils/api-client';
 
-const TeamSettingsPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }) => {
-    const isEthereal = theme === 'ethereal';
+const TeamSettingsPage: React.FC<{ workspace?: { id: string } }> = ({ workspace }) => {
+    const isEthereal = true;
     const [inviteLink, setInviteLink] = useState<string | null>(null);
     const [copied, setCopied] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -16,16 +17,12 @@ const TeamSettingsPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }) 
     const generateInvite = async () => {
         setIsLoading(true);
         try {
-            // In a real app, this would be an API call
-            // const res = await api.post('/workspaces/CURRENT_ID/invites');
-            // setInviteLink(res.data.inviteUrl);
-
-            // Simulating API delay
-            setTimeout(() => {
-                setInviteLink('https://app.skyreach.ai/#/accept-invite/8f92-vb92-1920');
-                setIsLoading(false);
-            }, 600);
+            const workspaceId = workspace?.id || 'w1'; // Fallback for dev if not passed
+            const res = await apiClient.post(`/workspaces/${workspaceId}/invites`);
+            setInviteLink(res.data.inviteUrl);
         } catch (e) {
+            console.error('Failed to generate invite', e);
+        } finally {
             setIsLoading(false);
         }
     };
@@ -39,31 +36,26 @@ const TeamSettingsPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }) 
     };
 
     return (
-        <div className={`space-y-8 ${isEthereal ? 'text-slate-800' : 'text-slate-100'}`}>
+        <div className="space-y-8 text-slate-800">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className={`text-2xl font-black font-heading ${isEthereal ? 'text-[#064e3b]' : 'text-white'}`}>Team Management</h2>
-                    <p className={`${isEthereal ? 'text-slate-500' : 'text-slate-400'} mt-1`}>Manage access to your workspace and billing.</p>
+                    <h2 className="text-xl font-bold font-heading text-slate-900">Team Management</h2>
+                    <p className="text-slate-500 text-sm mt-1">Manage access to your workspace and billing.</p>
                 </div>
                 <button
                     onClick={generateInvite}
-                    disabled={!!inviteLink}
-                    className={`px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all
-            ${isEthereal
-                            ? 'bg-[#10b981] text-white shadow-lg hover:bg-[#059669]'
-                            : 'bg-blue-600 text-white hover:bg-blue-700'
-                        }
-          `}
+                    disabled={isLoading || !!inviteLink}
+                    className="px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-widest bg-slate-900 text-white hover:bg-slate-800 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    <UserPlus size={18} />
+                    {isLoading ? <Loader2 size={16} className="animate-spin" /> : <UserPlus size={16} />}
                     {inviteLink ? 'Link Generated' : 'Invite Member'}
                 </button>
             </div>
 
             {/* Invite Link Section */}
             {inviteLink && (
-                <div className={`p-6 rounded-2xl border ${isEthereal ? 'bg-emerald-50 border-emerald-200' : 'bg-blue-900/20 border-blue-800'}`}>
-                    <h4 className={`text-sm font-bold mb-2 ${isEthereal ? 'text-emerald-800' : 'text-blue-300'}`}>
+                <div className="p-6 rounded-2xl border bg-emerald-50 border-emerald-200">
+                    <h4 className="text-sm font-bold mb-2 text-emerald-800">
                         Share this link to invite members
                     </h4>
                     <div className="flex gap-2">
@@ -71,15 +63,11 @@ const TeamSettingsPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }) 
                             type="text"
                             readOnly
                             value={inviteLink}
-                            className={`flex-1 px-4 py-3 rounded-xl font-mono text-sm border focus:outline-none 
-                ${isEthereal ? 'bg-white border-emerald-200 text-emerald-900' : 'bg-black/40 border-slate-700 text-slate-300'}
-              `}
+                            className="flex-1 px-4 py-3 rounded-xl font-mono text-sm border focus:outline-none bg-white border-emerald-200 text-emerald-900"
                         />
                         <button
                             onClick={copyLink}
-                            className={`px-4 rounded-xl flex items-center gap-2 font-bold transition-colors
-                ${isEthereal ? 'bg-emerald-200 hover:bg-emerald-300 text-emerald-900' : 'bg-slate-700 hover:bg-slate-600 text-white'}
-              `}
+                            className="px-4 rounded-xl flex items-center gap-2 font-bold transition-colors bg-emerald-200 hover:bg-emerald-300 text-emerald-900"
                         >
                             {copied ? <Check size={18} /> : <Copy size={18} />}
                             {copied ? 'Copied' : 'Copy'}
@@ -93,31 +81,25 @@ const TeamSettingsPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }) 
             )}
 
             {/* Members List */}
-            <div className={`rounded-[2.5rem] p-8 border ${isEthereal ? 'bg-white/60 border-white shadow-sm' : 'bg-slate-900/50 border-slate-800'}`}>
-                <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
+            <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+                <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-900">
                     <Users size={20} className="text-slate-400" />
                     Active Members
                 </h3>
 
-                <div className="space-y-4">
+                <div className="space-y-3">
                     {members.map(member => (
-                        <div key={member.id} className={`flex items-center justify-between p-4 rounded-2xl border transition-colors
-               ${isEthereal ? 'border-slate-100 hover:border-slate-200 bg-white' : 'border-slate-800 hover:border-slate-700 bg-black/20'}
-            `}>
+                        <div key={member.id} className="flex items-center justify-between p-4 rounded-lg border border-slate-100 bg-white hover:border-slate-300 transition-colors">
                             <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs
-                  ${isEthereal ? 'bg-slate-100 text-slate-600' : 'bg-slate-800 text-slate-300'}
-                `}>
+                                <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs bg-slate-50 text-slate-600">
                                     {member.avatar}
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-sm">{member.name} {member.id === '1' && '(You)'}</h4>
-                                    <p className="text-xs opacity-60">{member.email}</p>
+                                    <h4 className="font-bold text-sm text-slate-900">{member.name} {member.id === '1' && '(You)'}</h4>
+                                    <p className="text-xs text-slate-500">{member.email}</p>
                                 </div>
                             </div>
-                            <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider
-                ${isEthereal ? 'bg-slate-100 text-slate-600' : 'bg-slate-800 text-slate-300'}
-              `}>
+                            <div className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider">
                                 {member.role}
                             </div>
                         </div>

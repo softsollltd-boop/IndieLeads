@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Leaf,
   LayoutDashboard,
@@ -10,21 +11,17 @@ import {
   Flame,
   BarChart3,
   Settings,
-  Search,
-  CheckCircle,
-  XCircle,
   History,
   Bell,
   HelpCircle
 } from 'lucide-react';
 
 interface SidebarProps {
-  theme: 'ethereal' | 'glass';
   workspace: { id: string; name: string };
   onClose: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ theme, workspace, onClose }) => {
+const Sidebar: React.FC<SidebarProps> = ({ workspace, onClose }) => {
   const location = useLocation();
 
   const sidebarItems = [
@@ -42,107 +39,98 @@ const Sidebar: React.FC<SidebarProps> = ({ theme, workspace, onClose }) => {
   ];
 
   return (
-    <aside className={`w-64 h-full flex flex-col transition-all duration-300 relative z-50
-      ${theme === 'glass'
-        ? 'bg-slate-900/80 backdrop-blur-xl border-r border-slate-800'
-        : 'bg-white/80 backdrop-blur-xl border-r border-slate-200 shadow-xl'
-      }
-    `}>
+    <motion.aside
+      initial={{ x: -260 }}
+      animate={{ x: 0 }}
+      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+      className="w-64 h-full flex flex-col transition-colors duration-300 relative z-50 bg-white border-r border-slate-200"
+    >
       <div className="p-6 flex items-center gap-3">
-        <div className={`p-2 rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-500 shadow-lg`}>
-          <Leaf className="text-white w-6 h-6" />
-        </div>
+        <motion.div
+          whileHover={{ scale: 1.1, rotate: 5 }}
+          className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-200/50"
+        >
+          <Leaf size={22} className="text-white fill-current" />
+        </motion.div>
         <div>
-          <h1 className={`font-bold text-xl tracking-tight font-heading
-            ${theme === 'glass' ? 'text-white' : 'text-slate-800'}
-          `}>
+          <h1 className="font-bold text-xl tracking-tight font-heading text-slate-900">
             SkyReach
           </h1>
-          <p className={`text-xs font-medium
-             ${theme === 'glass' ? 'text-slate-400' : 'text-slate-500'}
-          `}>
-            Enterprise
-          </p>
         </div>
       </div>
 
-      <div className="px-4 mb-4">
-        <div className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all
-          ${theme === 'glass'
-            ? 'bg-slate-800/50 border-slate-700 hover:bg-slate-800 text-slate-200'
-            : 'bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-700'
-          }
-        `}>
+      <div className="px-4 mb-6">
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all bg-slate-50 border-slate-200 hover:bg-slate-100/50 text-slate-700"
+        >
           <div className="flex items-center gap-3">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm
-              ${theme === 'glass' ? 'bg-slate-700' : 'bg-slate-200'}
-            `}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs bg-emerald-100 text-emerald-700">
               {workspace.name.substring(0, 1)}
             </div>
-            <span className="font-medium text-sm truncate max-w-[100px]">{workspace.name}</span>
+            <span className="font-semibold text-sm truncate max-w-[120px]">{workspace.name}</span>
           </div>
-          <svg className="w-4 h-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
-        </div>
+        </motion.div>
       </div>
 
-      <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
-        {sidebarItems.map((item) => {
+      <nav className="flex-1 px-3 space-y-1 overflow-y-auto custom-scrollbar">
+        {sidebarItems.map((item, index) => {
           const isActive = location.pathname.startsWith(item.path);
           return (
-            <NavLink
+            <motion.div
               key={item.path}
-              to={item.path}
-              onClick={onClose}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group
-                ${isActive
-                  ? (theme === 'glass'
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
-                    : 'bg-emerald-500 text-white shadow-lg shadow-emerald-200'
-                  )
-                  : (theme === 'glass'
-                    ? 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
-                  )
-                }
-              `}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.03 }}
             >
-              <item.icon className={`w-5 h-5 transition-transform group-hover:scale-110 ${isActive ? 'animate-pulse-slow' : ''}`} />
-              <span className="font-medium">{item.label}</span>
-            </NavLink>
+              <NavLink
+                to={item.path}
+                onClick={onClose}
+                className={({ isActive }) => `
+                flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group
+                ${isActive
+                    ? 'bg-slate-900 text-white shadow-lg shadow-slate-200'
+                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-950'
+                  }
+              `}
+              >
+                <item.icon className={`w-5 h-5 ${isActive ? 'text-emerald-400' : ''}`} />
+                <span className="font-medium text-sm">{item.label}</span>
+                {isActive && (
+                  <motion.div
+                    layoutId="sidebar-indicator"
+                    className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-500"
+                  />
+                )}
+              </NavLink>
+            </motion.div>
           );
         })}
       </nav>
 
-      <div className={`p-4 border-t ${theme === 'glass' ? 'border-slate-800' : 'border-slate-200'}`}>
-        <div className={`rounded-xl p-4 relative overflow-hidden group
-           ${theme === 'glass' ? 'bg-gradient-to-br from-indigo-900/50 to-purple-900/50 border border-indigo-500/20' : 'bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100'}
-        `}>
-          <div className="absolute top-0 right-0 w-16 h-16 bg-white/10 rounded-full blur-2xl transform translate-x-1/2 -translate-y-1/2"></div>
+      <div className="p-4 border-t border-slate-200">
+        <div className="rounded-2xl p-4 border bg-slate-50 border-slate-200">
           <div className="relative z-10">
-            <h4 className={`text-sm font-bold mb-1 ${theme === 'glass' ? 'text-white' : 'text-indigo-900'}`}>
-              Pro Plan
+            <h4 className="text-xs font-semibold mb-1 text-slate-900">
+              Basic Plan
             </h4>
-            <p className={`text-xs mb-3 ${theme === 'glass' ? 'text-indigo-200' : 'text-indigo-600'}`}>
+            <p className="text-xs font-medium mb-3 text-slate-500">
               2,450 / 5,000 emails
             </p>
-            <div className={`h-1.5 rounded-full overflow-hidden ${theme === 'glass' ? 'bg-black/20' : 'bg-indigo-100'}`}>
-              <div className="h-full bg-gradient-to-r from-indigo-400 to-purple-400 w-[55%] rounded-full"></div>
+            <div className="h-1.5 rounded-full overflow-hidden bg-slate-200">
+              <div className="h-full bg-emerald-500 w-[55%] rounded-full"></div>
             </div>
-            <button className={`mt-3 w-full py-1.5 text-xs font-bold rounded-lg transition-colors
-              ${theme === 'glass'
-                ? 'bg-white/10 hover:bg-white/20 text-white'
-                : 'bg-indigo-100 hover:bg-indigo-200 text-indigo-700'
-              }
-            `}>
-              Upgrade Limit
+            <button className="mt-4 w-full py-2 text-xs font-semibold rounded-lg transition-colors bg-white hover:bg-slate-100 text-slate-900 border border-slate-200 shadow-sm">
+              Manage Sub
             </button>
           </div>
         </div>
       </div>
-    </aside>
+    </motion.aside>
   );
 };
 

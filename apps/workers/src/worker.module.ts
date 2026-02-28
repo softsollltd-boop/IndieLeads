@@ -1,4 +1,3 @@
-
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { SendingProcessor } from './processors/sending.processor';
@@ -11,14 +10,20 @@ import { RedisLockService } from '@api/common/locks/redis-lock.service';
 import { SmtpAdapter } from '@api/modules/inboxes/adapters/smtp.adapter';
 import { PrismaModule } from '@api/modules/prisma/prisma.module';
 import { RepliesModule } from '@api/modules/replies/replies.module';
+import { QueuesModule } from '@api/modules/queues/queues.module';
+import { QueuesService } from '@api/modules/queues/queues.service';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['.env', '../../.env'],
+    }),
     PrismaModule,
     InboxesModule,
     CampaignsModule,
     RepliesModule,
+    QueuesModule,
   ],
   providers: [
     SendingProcessor,
@@ -27,6 +32,7 @@ import { RepliesModule } from '@api/modules/replies/replies.module';
     ReplyFetchProcessor,
     RedisLockService,
     SmtpAdapter,
+    QueuesService,
   ],
 })
 export class WorkerModule { }

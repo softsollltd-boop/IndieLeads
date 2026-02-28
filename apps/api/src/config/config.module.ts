@@ -8,6 +8,7 @@ import { validate } from './env.validation';
   imports: [
     NestConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: ['.env', '../../.env'],
       validate,
       cache: true,
       expandVariables: true,
@@ -15,4 +16,4 @@ import { validate } from './env.validation';
   ],
   exports: [NestConfigModule],
 })
-export class ConfigModule {}
+export class ConfigModule { }

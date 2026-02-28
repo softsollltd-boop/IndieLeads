@@ -4,6 +4,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { LeadsService } from '../leads/leads.service';
 import { LeadStatus, ReplyCategory } from '@shared/types';
 import { GoogleGenAI } from "@google/genai";
+import { InboxesService } from '../inboxes/inboxes.service';
+import { SmtpAdapter } from '../inboxes/adapters/smtp.adapter';
 
 @Injectable()
 export class RepliesService {
@@ -13,6 +15,8 @@ export class RepliesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly leadsService: LeadsService,
+    private readonly inboxesService: InboxesService,
+    private readonly smtpAdapter: SmtpAdapter,
   ) {
     this.aiClient = new GoogleGenAI({ apiKey: process.env.API_KEY });
   }
@@ -104,5 +108,36 @@ export class RepliesService {
       include: { lead: true },
       orderBy: { receivedAt: 'desc' }
     });
+  }
+
+  /**
+   * Manual Reply Dispatch
+   * Sends an outbound email to a lead as a threaded response to a specific message.
+   */
+  async sendReply(workspaceId: string, replyId: string, body: string) {
+    const replyLog = await (this.prisma as any).replyLog.findUnique({
+      where: { id: replyId },
+      include: { lead: true, inbox: true }
+    });
+
+    if (!replyLog || replyLog.workspaceId !== workspaceId) {
+      throw new Error('REPLY_NOT_FOUND');
+    }
+
+    const creds = await this.inboxesService.getDecryptedCredentials(replyLog.inboxId);
+
+    // Dispatch via SMTP
+    await this.smtpAdapter.sendEmail(creds, {
+      to: replyLog.lead.email,
+      fromName: replyLog.inbox.fromName || 'SkyReach User',
+      subject: `Re: ${replyLog.subject}`,
+      body,
+      inReplyTo: replyLog.messageId,
+      references: replyLog.messageId,
+      leadId: replyLog.leadId,
+      logId: replyLog.sendingLogId // Link back to original campaign log if available
+    });
+
+    return { success: true };
   }
 }

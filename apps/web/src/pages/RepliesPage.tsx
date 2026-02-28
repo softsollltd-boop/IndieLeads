@@ -7,6 +7,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import apiClient from '../utils/api-client';
 import Skeleton from '../components/Skeleton';
+import { toast } from 'react-hot-toast';
 
 interface ReplyLog {
   id: string;
@@ -29,6 +30,8 @@ const MasterInboxPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }) =
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDetailOnMobile, setShowDetailOnMobile] = useState(false);
+  const [responseText, setResponseText] = useState('');
+  const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
     fetchReplies();
@@ -52,8 +55,27 @@ const MasterInboxPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }) =
 
   const handleSelectReply = (reply: ReplyLog) => {
     setSelectedReply(reply);
+    setResponseText('');
     if (window.innerWidth < 1024) {
       setShowDetailOnMobile(true);
+    }
+  };
+
+  const handleDispatch = async () => {
+    if (!selectedReply || !responseText.trim()) return;
+
+    setIsSending(true);
+    try {
+      await apiClient.post(`/replies/${selectedReply.id}/send`, {
+        body: responseText
+      });
+      toast.success('Reply dispatched successfully');
+      setResponseText('');
+    } catch (err) {
+      console.error('Dispatch failed', err);
+      toast.error('Failed to dispatch reply');
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -208,15 +230,23 @@ const MasterInboxPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }) =
                 <textarea
                   placeholder={`Respond to ${selectedReply.lead.firstName || 'lead'}...`}
                   rows={2}
-                  className="w-full bg-transparent border-none p-3 lg:p-4 text-sm font-medium focus:ring-0 resize-none placeholder:text-slate-500"
+                  value={responseText}
+                  onChange={e => setResponseText(e.target.value)}
+                  disabled={isSending}
+                  className="w-full bg-transparent border-none p-3 lg:p-4 text-sm font-medium focus:ring-0 resize-none placeholder:text-slate-500 disabled:opacity-50"
                 ></textarea>
                 <div className="flex items-center justify-between p-2 lg:p-4 pt-0 lg:pt-2">
                   <div className="flex items-center space-x-3 lg:space-x-4">
                     <button className="text-slate-500 hover:text-[#10b981] transition-colors"><Plus size={18} /></button>
                     <button className="text-slate-500 hover:text-[#10b981] transition-colors"><Smile size={18} /></button>
                   </div>
-                  <button className="btn-primary px-6 lg:px-8 py-2.5 lg:py-3 rounded-xl lg:rounded-2xl font-black text-[10px] lg:text-xs uppercase tracking-widest flex items-center shadow-lg active:scale-95">
-                    <Send className="w-3.5 h-3.5 mr-2" /> Dispatch
+                  <button
+                    onClick={handleDispatch}
+                    disabled={isSending || !responseText.trim()}
+                    className="btn-primary px-6 lg:px-8 py-2.5 lg:py-3 rounded-xl lg:rounded-2xl font-black text-[10px] lg:text-xs uppercase tracking-widest flex items-center shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSending ? <Loader2 size={16} className="mr-2 animate-spin" /> : <Send className="w-3.5 h-3.5 mr-2" />}
+                    Dispatch
                   </button>
                 </div>
               </div>

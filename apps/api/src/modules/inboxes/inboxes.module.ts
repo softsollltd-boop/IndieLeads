@@ -18,6 +18,6 @@ import { SecurityModule } from '../security/security.module';
     OutlookAdapter,
     SmtpAdapter,
   ],
-  exports: [InboxesService],
+  exports: [InboxesService, SmtpAdapter],
 })
 export class InboxesModule { }

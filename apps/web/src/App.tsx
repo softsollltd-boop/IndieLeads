@@ -3,6 +3,7 @@ import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-d
 import { AnimatePresence } from 'framer-motion';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
+import GhostStatus from './components/GhostStatus';
 import DashboardPage from './pages/DashboardPage';
 import CampaignsPage from './pages/CampaignsPage';
 import CampaignEditorPage from './pages/CampaignEditorPage';
@@ -18,6 +19,9 @@ import AuditLogsPage from './pages/AuditLogsPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import UnsubscribePage from './pages/UnsubscribePage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
 import LandingPage from './pages/LandingPage';
@@ -30,22 +34,20 @@ import { AdminCampaignsPage } from './pages/admin/AdminCampaignsPage';
 import { SupportPage } from './pages/SupportPage';
 import { CrispChat } from './components/CrispChat';
 import AcceptInvitePage from './pages/AcceptInvitePage';
-
-type Theme = 'ethereal' | 'glass';
+import PageTransition from './components/PageTransition';
+import { Toaster } from 'react-hot-toast';
 
 const AppContent: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
-  const [theme, setTheme] = useState<Theme>((localStorage.getItem('app-theme') as Theme) || 'ethereal');
   const [currentWorkspace, setCurrentWorkspace] = useState({ id: 'w1', name: 'Alpha Growth' });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showGhostMode, setShowGhostMode] = useState(true);
   const location = useLocation();
 
   useEffect(() => {
-    document.body.className = `theme-${theme}`;
-    localStorage.setItem('app-theme', theme);
-  }, [theme]);
+    document.body.className = 'theme-ethereal';
+  }, []);
 
-  const toggleTheme = () => setTheme(prev => prev === 'ethereal' ? 'glass' : 'ethereal');
   const handleLogin = () => setIsAuthenticated(true);
 
   // Check if we are in the Admin section
@@ -54,19 +56,23 @@ const AppContent: React.FC = () => {
   // If authenticated and in admin route, show Admin Layout
   if (isAuthenticated && isAdminRoute) {
     return (
-      <Routes>
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<AdminDashboardPage />} />
-          <Route path="users" element={<AdminUsersPage />} />
-          <Route path="campaigns" element={<AdminCampaignsPage />} />
-        </Route>
-      </Routes>
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<PageTransition><AdminDashboardPage /></PageTransition>} />
+            <Route path="users" element={<PageTransition><AdminUsersPage /></PageTransition>} />
+            <Route path="campaigns" element={<PageTransition><AdminCampaignsPage /></PageTransition>} />
+          </Route>
+        </Routes>
+      </AnimatePresence>
     );
   }
 
   return (
     <div className="flex h-screen w-full overflow-hidden relative">
       {/* Global Helper Components */}
+      <GhostStatus isVisible={showGhostMode} />
+      <Toaster position="top-right" />
       {isAuthenticated && <CrispChat />}
 
       {isAuthenticated && (
@@ -78,7 +84,7 @@ const AppContent: React.FC = () => {
             />
           )}
           <div className={`fixed inset-y-0 left-0 z-50 lg:static lg:block transition-transform duration-500 ease-out transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-            <Sidebar theme={theme} workspace={currentWorkspace} onClose={() => setIsSidebarOpen(false)} />
+            <Sidebar workspace={currentWorkspace} onClose={() => setIsSidebarOpen(false)} />
           </div>
         </>
       )}
@@ -86,42 +92,44 @@ const AppContent: React.FC = () => {
       <div className="flex flex-col flex-1 overflow-hidden w-full relative">
         {isAuthenticated && (
           <Navbar
-            theme={theme}
-            onToggleTheme={toggleTheme}
             workspace={currentWorkspace}
             onWorkspaceChange={setCurrentWorkspace}
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           />
         )}
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 scroll-smooth">
-          <AnimatePresence mode="wait">
-            <Routes>
-              <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
-              <Route path="/signup" element={<SignupPage />} />
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/terms" element={<TermsPage />} />
-              <Route path="/privacy" element={<PrivacyPage />} />
-              <Route path="/accept-invite/:token" element={<AcceptInvitePage />} />
-              <Route path="/unsub/:leadId" element={<UnsubscribePage />} />
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 scroll-smooth relative">
+          <AnimatePresence mode="wait" initial={false}>
+            <Routes location={location} key={location.pathname}>
+              <Route path="/login" element={<PageTransition><LoginPage onLogin={handleLogin} /></PageTransition>} />
+              <Route path="/signup" element={<PageTransition><SignupPage /></PageTransition>} />
+              <Route path="/" element={<PageTransition><LandingPage /></PageTransition>} />
+              <Route path="/terms" element={<PageTransition><TermsPage /></PageTransition>} />
+              <Route path="/privacy" element={<PageTransition><PrivacyPage /></PageTransition>} />
+              <Route path="/accept-invite/:token" element={<PageTransition><AcceptInvitePage /></PageTransition>} />
+              <Route path="/unsub/:leadId" element={<PageTransition><UnsubscribePage /></PageTransition>} />
+              <Route path="/verify-email" element={<PageTransition><VerifyEmailPage /></PageTransition>} />
+              <Route path="/forgot-password" element={<PageTransition><ForgotPasswordPage /></PageTransition>} />
+              <Route path="/reset-password" element={<PageTransition><ResetPasswordPage /></PageTransition>} />
 
               {!isAuthenticated ? (
                 <Route path="*" element={<Navigate to="/login" replace />} />
               ) : (
                 <>
-                  <Route path="/dashboard" element={<DashboardPage theme={theme} />} />
-                  <Route path="/campaigns" element={<CampaignsPage theme={theme} />} />
-                  <Route path="/campaigns/:id" element={<CampaignEditorPage theme={theme} />} />
-                  <Route path="/leads" element={<LeadsPage theme={theme} />} />
-                  <Route path="/replies" element={<RepliesPage theme={theme} />} />
-                  <Route path="/inboxes" element={<InboxesPage theme={theme} />} />
-                  <Route path="/warmup" element={<WarmupPage theme={theme} />} />
-                  <Route path="/lab" element={<DeliverabilityLabPage theme={theme} />} />
-                  <Route path="/analytics" element={<AnalyticsPage theme={theme} />} />
-                  <Route path="/notifications" element={<NotificationsPage theme={theme} />} />
-                  <Route path="/audit-logs" element={<AuditLogsPage theme={theme} />} />
-                  <Route path="/settings" element={<SettingsPage theme={theme} />} />
-                  <Route path="/support" element={<SupportPage />} />
+                  <Route path="/dashboard" element={<PageTransition><DashboardPage /></PageTransition>} />
+                  <Route path="/campaigns" element={<PageTransition><CampaignsPage /></PageTransition>} />
+                  <Route path="/campaigns/:id" element={<PageTransition><CampaignEditorPage /></PageTransition>} />
+                  <Route path="/leads" element={<PageTransition><LeadsPage /></PageTransition>} />
+                  <Route path="/replies" element={<PageTransition><RepliesPage /></PageTransition>} />
+                  <Route path="/inboxes" element={<PageTransition><InboxesPage /></PageTransition>} />
+                  <Route path="/warmup" element={<PageTransition><WarmupPage /></PageTransition>} />
+                  <Route path="/lab" element={<PageTransition><DeliverabilityLabPage /></PageTransition>} />
+                  <Route path="/analytics" element={<PageTransition><AnalyticsPage /></PageTransition>} />
+                  <Route path="/notifications" element={<PageTransition><NotificationsPage /></PageTransition>} />
+                  <Route path="/audit-logs" element={<PageTransition><AuditLogsPage /></PageTransition>} />
+                  <Route path="/settings" element={<PageTransition><SettingsPage /></PageTransition>} />
+                  <Route path="/support" element={<PageTransition><SupportPage /></PageTransition>} />
+                  <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </>
               )}
             </Routes>
@@ -134,7 +142,7 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <HashRouter>
+    <HashRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AppContent />
     </HashRouter>
   );

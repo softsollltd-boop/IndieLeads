@@ -14,49 +14,51 @@ export class InboxesService {
     private readonly smtpAdapter: SmtpAdapter,
   ) { }
 
+  /**
+   * Initializes and connects a new email account to the workspace.
+   */
   async create(workspaceId: string, dto: CreateInboxDto) {
-    this.logger.log(`Initiating protocol check for node: ${dto.email}`);
+    this.logger.log(`Initiating account connection for: ${dto.email}`);
 
-    // 0. Pre-check: Ensure email doesn't already exist in the system
-    const existing = await (this.prisma as any).inbox.findUnique({
+    // Pre-validation: Prevent duplicate accounts
+    const existing = await this.prisma.inbox.findUnique({
       where: { email: dto.email }
     });
 
     if (existing) {
-      throw new BadRequestException(`Email account ${dto.email} is already connected to a workspace. Duplicate entries are not permitted.`);
+      throw new BadRequestException(`Email account ${dto.email} is already registered. Duplicate accounts are not permitted.`);
     }
 
-    // 1. Live Validation: Verify SMTP handshake before saving
-    // Automated Host Injection for known providers
-    if (dto.provider === InboxProvider.GOOGLE && (!dto.credentials.smtpHost || dto.credentials.smtpHost === '')) {
+    // Dynamic configuration for managed providers
+    if (dto.provider === InboxProvider.GOOGLE && (!dto.credentials.smtpHost)) {
       dto.credentials.smtpHost = 'smtp.gmail.com';
       dto.credentials.smtpPort = 465;
       dto.credentials.imapHost = 'imap.gmail.com';
       dto.credentials.imapPort = 993;
-    } else if (dto.provider === InboxProvider.OUTLOOK && (!dto.credentials.smtpHost || dto.credentials.smtpHost === '')) {
+    } else if (dto.provider === InboxProvider.OUTLOOK && (!dto.credentials.smtpHost)) {
       dto.credentials.smtpHost = 'smtp.office365.com';
       dto.credentials.smtpPort = 587;
       dto.credentials.imapHost = 'outlook.office365.com';
       dto.credentials.imapPort = 993;
     }
 
-    // Skip validation if we already have an accessToken (fulfilling from OAuth flow)
+    // Authenticate and validate protocol connectivity
     const isValid = dto.credentials.accessToken
       ? true
       : await this.smtpAdapter.validateCredentials(dto.credentials);
 
     if (!isValid) {
-      throw new BadRequestException(`Protocol Check Failed: Authentication rejected by ${dto.provider}. Verify App Password and Host configuration.`);
+      throw new BadRequestException(`Authentication Failed: Protocol handshake rejected by ${dto.provider}. Verify app passwords and security settings.`);
     }
 
-    // 2. Automated Domain Mapping
+    // Automated Domain Management
     const domainName = dto.email.split('@')[1];
-    let domain = await (this.prisma as any).domain.findFirst({
+    let domain = await this.prisma.domain.findFirst({
       where: { domainName, workspaceId }
     });
 
     if (!domain) {
-      domain = await (this.prisma as any).domain.create({
+      domain = await this.prisma.domain.create({
         data: {
           workspaceId,
           domainName,
@@ -68,15 +70,15 @@ export class InboxesService {
       });
     }
 
-    // 3. Encrypt Protocol Credentials (AES-256-GCM)
+    // Secure credential persistence
     const encryptedCreds = this.security.encrypt(JSON.stringify(dto.credentials));
 
-    return (this.prisma as any).inbox.create({
+    return this.prisma.inbox.create({
       data: {
         workspaceId,
         domainId: domain.id,
         email: dto.email,
-        fromName: dto.fromName || dto.email.split('@')[0],
+        fromName: dto.fromName || dto.email.split('@')[1], // Fallback to domain or part of email
         provider: dto.provider,
         credentials: encryptedCreds,
         status: 'active',
@@ -88,6 +90,9 @@ export class InboxesService {
     });
   }
 
+  /**
+   * Retrieves all accounts for a workspace with pagination.
+   */
   async findAll(workspaceId: string, page: number = 1, limit: number = 10, search?: string) {
     const skip = (page - 1) * limit;
     const where: any = { workspaceId };
@@ -127,7 +132,7 @@ export class InboxesService {
         },
         orderBy: { createdAt: 'desc' }
       }),
-      (this.prisma as any).inbox.count({ where })
+      this.prisma.inbox.count({ where })
     ]);
 
     return {
@@ -141,28 +146,36 @@ export class InboxesService {
     };
   }
 
+  /**
+   * Retrieves a single account details.
+   */
   async findOne(workspaceId: string, id: string) {
-    const inbox = await (this.prisma as any).inbox.findFirst({
+    const inbox = await this.prisma.inbox.findFirst({
       where: { id, workspaceId },
       include: { domain: true }
     });
-    if (!inbox) throw new NotFoundException('Inbox node not found in current sector');
+    if (!inbox) throw new NotFoundException('Account not found in workspace.');
     return inbox;
   }
 
+  /**
+   * Updates account settings.
+   */
   async updateSettings(workspaceId: string, id: string, dto: UpdateInboxSettingsDto) {
     const inbox = await this.findOne(workspaceId, id);
-    return (this.prisma as any).inbox.update({
+    return this.prisma.inbox.update({
       where: { id: inbox.id },
       data: { ...dto }
     });
   }
 
+  /**
+   * Bulk updates settings across multiple accounts.
+   */
   async bulkUpdate(workspaceId: string, dto: any) {
     const { inboxIds, ...settings } = dto;
 
-    // Validate all inboxes belong to the workspace
-    const inboxes = await (this.prisma as any).inbox.findMany({
+    const inboxes = await this.prisma.inbox.findMany({
       where: {
         id: { in: inboxIds },
         workspaceId
@@ -170,19 +183,18 @@ export class InboxesService {
     });
 
     if (inboxes.length !== inboxIds.length) {
-      throw new BadRequestException('Some inbox nodes were not found in current sector');
+      throw new BadRequestException('Some accounts were not found in the workspace.');
     }
 
-    // Filter out undefined values from settings to avoid overwriting with nulls if that's not intended
     const updateData = Object.fromEntries(
       Object.entries(settings).filter(([_, v]) => v !== undefined && v !== '')
     );
 
     if (Object.keys(updateData).length === 0) {
-      return { count: 0, message: 'No updates performed as all fields were empty.' };
+      return { count: 0, message: 'No updates performed.' };
     }
 
-    return (this.prisma as any).inbox.updateMany({
+    return this.prisma.inbox.updateMany({
       where: {
         id: { in: inboxIds },
         workspaceId
@@ -191,29 +203,41 @@ export class InboxesService {
     });
   }
 
+  /**
+   * Performs a health check and updates status.
+   */
   async checkHealth(workspaceId: string, id: string) {
     const inbox = await this.findOne(workspaceId, id);
     const creds = await this.getDecryptedCredentials(id);
     const health = await this.smtpAdapter.healthCheck(creds);
 
-    return (this.prisma as any).inbox.update({
+    return this.prisma.inbox.update({
       where: { id },
       data: { status: health.status }
     });
   }
 
+  /**
+   * Permanently removes an account.
+   */
   async remove(workspaceId: string, id: string) {
     const inbox = await this.findOne(workspaceId, id);
-    return (this.prisma as any).inbox.delete({ where: { id: inbox.id } });
+    return this.prisma.inbox.delete({ where: { id: inbox.id } });
   }
 
+  /**
+   * Retrieves and decrypts credentials for system operations.
+   */
   async getDecryptedCredentials(id: string) {
-    const inbox = await (this.prisma as any).inbox.findUnique({ where: { id } });
-    if (!inbox) throw new NotFoundException();
+    const inbox = await this.prisma.inbox.findUnique({ where: { id } });
+    if (!inbox) throw new NotFoundException('Account credentials not found.');
     const decrypted = this.security.decrypt(inbox.credentials);
     return JSON.parse(decrypted);
   }
 
+  /**
+   * Sends a test email to verify configuration.
+   */
   async sendTestEmail(workspaceId: string, id: string, to: string, subject: string, body: string) {
     const inbox = await this.findOne(workspaceId, id);
     const creds = await this.getDecryptedCredentials(id);

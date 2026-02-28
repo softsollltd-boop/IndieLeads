@@ -40,94 +40,102 @@ const LoginPage: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen theme-ethereal flex items-center justify-center p-6">
+    <div className="min-h-screen theme-ethereal flex items-center justify-center p-6 bg-slate-50">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#10b981]/10 blur-[150px] rounded-full"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-sky-400/10 blur-[150px] rounded-full"></div>
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-emerald-100/30 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-sky-100/30 blur-[120px] rounded-full"></div>
       </div>
 
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="w-full max-w-[480px] glass-surface rounded-[3rem] p-12 shadow-2xl relative z-10"
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-[450px] bg-white rounded-3xl p-10 shadow-xl shadow-slate-200/50 border border-slate-100 relative z-10"
       >
-        <div className="flex flex-col items-center text-center mb-12">
-          <motion.div 
-            whileHover={{ rotate: 180 }}
-            transition={{ duration: 0.8, ease: "easeInOut" }}
-            className="w-16 h-16 bg-gradient-to-br from-[#10b981] to-[#059669] rounded-2xl flex items-center justify-center mb-6 shadow-xl shadow-[#10b981]/30"
+        <div className="flex flex-col items-center text-center mb-10">
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            className="w-14 h-14 bg-emerald-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-emerald-200"
           >
-            <Zap className="text-white w-9 h-9 fill-current" />
+            <Zap className="text-white w-8 h-8 fill-current" />
           </motion.div>
-          <h1 className="text-4xl font-black text-[#064e3b] font-heading tracking-tighter">SkyReach</h1>
+          <h1 className="text-3xl font-bold text-slate-900 font-heading">SkyReach</h1>
           <p className="text-slate-500 font-medium mt-2">The Enterprise Deliverability Protocol</p>
         </div>
 
         {error && (
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8 p-4 bg-rose-500/10 border border-rose-500/20 text-rose-600 text-[10px] font-black uppercase tracking-widest leading-relaxed rounded-2xl flex items-start"
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mb-8 p-4 bg-red-50 border border-red-100 text-red-600 text-sm font-medium rounded-xl flex items-start"
           >
-            <AlertCircle size={16} className="mr-3 shrink-0 mt-0.5" /> 
+            <AlertCircle size={18} className="mr-3 shrink-0 mt-0.5" />
             <span>{error}</span>
           </motion.div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 ml-1">Terminal Email</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2 ml-1">Email Address</label>
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input 
-                type="email" 
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="commander@enterprise.io"
-                className="w-full h-14 pl-12 pr-4 rounded-2xl text-sm font-bold bg-white/60 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-[#10b981]/10 transition-all placeholder:text-slate-300"
+                placeholder="name@company.com"
+                className="w-full h-12 pl-12 pr-4 rounded-xl text-sm bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
                 required
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 ml-1">Secure Passkey</label>
+            <div className="flex justify-between items-center mt-2 ml-1">
+              <label className="block text-sm font-semibold text-slate-700">Password</label>
+              <button
+                type="button"
+                onClick={() => navigate('/forgot-password')}
+                className="text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors"
+              >
+                Forgot password?
+              </button>
+            </div>
             <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input 
-                type="password" 
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full h-14 pl-12 pr-4 rounded-2xl text-sm font-bold bg-white/60 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-[#10b981]/10 transition-all placeholder:text-slate-300"
+                className="w-full h-12 pl-12 pr-4 rounded-xl text-sm bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-mono"
                 required
               />
             </div>
           </div>
 
-          <button 
+          <button
             type="submit"
             disabled={isLoading}
-            className="w-full btn-primary h-14 rounded-2xl font-black uppercase tracking-widest text-xs transition-all active:scale-95 flex items-center justify-center group mt-10"
+            className="w-full bg-slate-900 text-white h-12 rounded-xl font-bold text-sm hover:bg-slate-800 transition-all active:scale-[0.98] flex items-center justify-center group mt-8 shadow-lg shadow-slate-200"
           >
-            {isLoading ? <Activity className="w-5 h-5 mr-3 animate-spin" /> : 'Authorize Protocol'}
-            {!isLoading && <ArrowRight size={18} className="ml-3 group-hover:translate-x-1 transition-transform" />}
+            {isLoading ? <Activity className="w-5 h-5 mr-3 animate-spin" /> : 'Sign in to account'}
+            {!isLoading && <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />}
           </button>
         </form>
 
         <div className="mt-10 pt-8 border-t border-slate-100 text-center">
-          <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">
-            New Commander? <button onClick={() => navigate('/signup')} className="text-[#10b981] font-bold hover:underline">Initiate Signup</button>
+          <p className="text-sm text-slate-500 font-medium">
+            New to SkyReach? <button onClick={() => navigate('/signup')} className="text-emerald-600 font-semibold hover:text-emerald-700">Create an account</button>
           </p>
         </div>
 
-        <div className="mt-8 flex items-center justify-center space-x-3 text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">
-           <ShieldCheck size={14} className="text-[#10b981]" />
-           <span>ISO 27001 Protocol</span>
+        <div className="mt-8 flex items-center justify-center space-x-2 text-xs text-slate-400 font-medium">
+          <ShieldCheck size={14} className="text-emerald-500" />
+          <span>Enterprise grade security included</span>
         </div>
       </motion.div>
-    </div>
+    </div >
   );
 };
 

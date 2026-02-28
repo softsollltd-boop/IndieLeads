@@ -59,8 +59,10 @@ export class SmtpAdapter implements EmailProviderAdapter {
         html: payload.body,
         headers: {
           'X-SkyReach-Log-ID': payload.logId, // CRITICAL: This is used for reply tracking
-          'Message-ID': `<${payload.logId}@skyreach.ai>`,
-          'List-Unsubscribe': `<${process.env.FRONTEND_URL}/#/unsub/${payload.leadId}>`
+          'Message-ID': `<${payload.logId || Math.random().toString(36).substring(7)}@skyreach.ai>`,
+          'List-Unsubscribe': `<${process.env.FRONTEND_URL}/#/unsub/${payload.leadId}>`,
+          ...(payload.inReplyTo ? { 'In-Reply-To': payload.inReplyTo } : {}),
+          ...(payload.references ? { 'References': payload.references } : {}),
         }
       });
       return { messageId: info.messageId };

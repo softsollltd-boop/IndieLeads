@@ -21,10 +21,9 @@ interface Step {
 
 const FieldMapper: React.FC<{
   headers: string[],
-  onComplete: (mapping: Record<string, string>) => void,
-  theme: 'ethereal' | 'glass'
-}> = ({ headers, onComplete, theme }) => {
-  const isEthereal = theme === 'ethereal';
+  onComplete: (mapping: Record<string, string>) => void
+}> = ({ headers, onComplete }) => {
+  const isEthereal = true;
   const systemFields = [
     { key: 'email', label: 'Email Address (Required)', required: true },
     { key: 'firstName', label: 'First Name', required: false },
@@ -50,14 +49,14 @@ const FieldMapper: React.FC<{
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-3">
         {systemFields.map(field => (
-          <div key={field.key} className={`p-4 rounded-2xl border flex items-center justify-between ${isEthereal ? 'bg-white border-slate-100' : 'bg-white/5 border-white/5'}`}>
-            <span className={`text-xs font-black uppercase tracking-widest ${isEthereal ? 'text-slate-500' : 'text-slate-400'}`}>{field.label}</span>
+          <div key={field.key} className="p-4 rounded-lg border flex items-center justify-between bg-white border-slate-200 shadow-sm">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{field.label}</span>
             <select
               value={mapping[field.key] || ''}
               onChange={(e) => setMapping({ ...mapping, [field.key]: e.target.value })}
-              className={`text-xs font-bold p-2 rounded-xl outline-none border ${isEthereal ? 'bg-slate-50 border-slate-200' : 'bg-black/20 border-white/10 text-white'}`}
+              className="text-xs font-bold p-2 rounded-lg outline-none border bg-slate-50 border-slate-200"
             >
               <option value="">Select Column</option>
               {headers.map(h => <option key={h} value={h}>{h}</option>)}
@@ -68,15 +67,16 @@ const FieldMapper: React.FC<{
       <button
         onClick={() => onComplete(mapping)}
         disabled={!mapping.email}
-        className="w-full btn-primary h-14 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl flex items-center justify-center disabled:opacity-50"
+        className="w-full btn-primary h-12 rounded-lg font-bold uppercase tracking-widest text-xs shadow-sm flex items-center justify-center disabled:opacity-50"
       >
-        Finalize Mapping <ArrowRight size={18} className="ml-2" />
+        Finish Mapping <ArrowRight size={16} className="ml-2" />
       </button>
     </div>
   );
 };
 
-const Stepper: React.FC<{ currentStep: number, isEthereal: boolean, onStepClick: (step: number) => void }> = ({ currentStep, isEthereal, onStepClick }) => {
+const Stepper: React.FC<{ currentStep: number, onStepClick: (step: number) => void }> = ({ currentStep, onStepClick }) => {
+  const isEthereal = true;
   const steps = [
     { n: 1, label: 'Import Leads', icon: Users },
     { n: 2, label: 'Sequence', icon: Layout },
@@ -85,26 +85,26 @@ const Stepper: React.FC<{ currentStep: number, isEthereal: boolean, onStepClick:
   ];
 
   return (
-    <div className="flex items-center justify-center space-x-2 md:space-x-4 mb-12">
+    <div className="flex items-center justify-center space-x-2 md:space-x-4 mb-10">
       {steps.map((s, idx) => (
         <React.Fragment key={s.n}>
           <div
             className="flex flex-col items-center cursor-pointer group"
             onClick={() => onStepClick(s.n)}
           >
-            <div className={`w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 ${currentStep === s.n
-              ? (isEthereal ? 'bg-[#10b981] text-white shadow-lg' : 'bg-[#00E5FF] text-slate-900 shadow-[0_0_20px_rgba(0,229,255,0.3)]')
+            <div className={`w-10 h-10 md:w-11 md:h-11 rounded-lg flex items-center justify-center transition-all ${currentStep === s.n
+              ? 'bg-slate-900 text-white shadow-sm'
               : currentStep > s.n
-                ? (isEthereal ? 'bg-[#10b981]/10 text-[#10b981]' : 'bg-[#00E5FF]/10 text-[#00E5FF]')
-                : (isEthereal ? 'bg-slate-100 text-slate-400' : 'bg-white/5 text-slate-600')
+                ? 'bg-slate-100 text-slate-700'
+                : 'bg-slate-50 text-slate-400 border border-slate-100'
               }`}>
-              <s.icon size={18} />
+              <s.icon size={16} />
             </div>
-            <span className={`hidden sm:block text-[10px] font-black uppercase tracking-widest mt-3 transition-colors ${currentStep === s.n ? (isEthereal ? 'text-[#064e3b]' : 'text-white') : 'text-slate-500'
+            <span className={`hidden sm:block text-[9px] font-bold uppercase tracking-widest mt-2 transition-colors ${currentStep === s.n ? 'text-slate-900' : 'text-slate-500'
               }`}>{s.label}</span>
           </div>
           {idx < steps.length - 1 && (
-            <div className={`w-8 md:w-16 h-0.5 rounded-full mb-0 md:mb-6 transition-colors duration-500 ${currentStep > s.n ? (isEthereal ? 'bg-[#10b981]' : 'bg-[#00E5FF]') : (isEthereal ? 'bg-slate-100' : 'bg-white/5')
+            <div className={`w-8 md:w-12 h-[1px] mb-0 md:mb-5 transition-colors ${currentStep > s.n ? 'bg-slate-900' : 'bg-slate-200'
               }`} />
           )}
         </React.Fragment>
@@ -126,18 +126,18 @@ const TZ_SUGGESTIONS: Record<string, string> = {
   'Paris': 'Europe/Paris',
 };
 
-const CampaignEditorPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }) => {
+const CampaignEditorPage: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const isEthereal = theme === 'ethereal';
+  const isEthereal = true;
 
   const [currentStep, setCurrentStep] = useState(1);
   const [campaignName, setCampaignName] = useState(() => {
     if (!id || id === 'new') {
       const now = new Date();
-      return `${now.getMonth() + 1}-${now.getDate()}-${now.getFullYear().toString().slice(-2)}-${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}-Campaign`;
+      return `Campaign ${now.getMonth() + 1}-${now.getDate()}`;
     }
-    return 'Loading Protocol...';
+    return 'Loading...';
   });
   const [steps, setSteps] = useState<Step[]>([]);
   const [inboxes, setInboxes] = useState<any[]>([]);
@@ -308,7 +308,7 @@ const CampaignEditorPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }
         const { data: response } = await apiClient.get('/campaigns');
         const campaigns = Array.isArray(response) ? response : (response?.data || []);
         if (campaigns.some((c: any) => c.name.toLowerCase() === campaignName.toLowerCase())) {
-          alert('A protocol with this designation already exists in your fleet.');
+          alert('A campaign with this name already exists.');
           if (!isAuto) setIsSaving(false);
           return;
         }
@@ -392,96 +392,87 @@ const CampaignEditorPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }
   return (
     <div className="space-y-10 fade-in pb-32">
       {/* Header Area */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
-        <div className="flex items-center space-x-6">
-          <button onClick={() => navigate('/campaigns')} className={`p-4 rounded-2xl transition-all ${isEthereal ? 'bg-white text-slate-500 hover:bg-slate-100 shadow-sm' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`}>
-            <ArrowLeft size={20} />
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex items-center space-x-5">
+          <button onClick={() => navigate('/campaigns')} className="p-3 rounded-lg transition-all bg-white text-slate-500 hover:bg-slate-50 border border-slate-200 shadow-sm">
+            <ArrowLeft size={18} />
           </button>
           <div>
             <div className="flex items-center space-x-3">
               <input
                 value={campaignName}
                 onChange={(e) => setCampaignName(e.target.value)}
-                className={`text-2xl md:text-3xl font-black font-heading bg-transparent border-none p-0 focus:ring-0 min-w-[300px] ${isEthereal ? 'text-[#064e3b]' : 'text-white'}`}
+                className="text-xl font-bold font-heading bg-transparent border-none p-0 focus:ring-0 min-w-[300px] text-slate-900"
               />
-              <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest border ${campaignStatus === 'active' ? (isEthereal ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20') : 'bg-white/5 text-slate-500'}`}>{campaignStatus}</span>
+              <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest border ${campaignStatus === 'active' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>{campaignStatus}</span>
             </div>
-            <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Campaign Configuration Matrix</p>
-            {lastSaved && (
-              <div className="flex items-center space-x-2 mt-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                <span className="text-[9px] font-black uppercase text-slate-500">Auto-saved at {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-              </div>
-            )}
+            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-0.5">Edit Campaign</p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-3">
           {currentStep > 1 && (
-            <button onClick={handleBack} className={`px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center transition-all ${isEthereal ? 'text-slate-600 hover:bg-slate-100' : 'text-slate-400 hover:bg-white/5'}`}>
-              <ChevronLeft className="mr-2" size={18} /> Back
+            <button onClick={handleBack} className="px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-widest flex items-center transition-all text-slate-600 hover:bg-slate-100">
+              <ChevronLeft className="mr-2" size={16} /> Previous
             </button>
           )}
           <button
             onClick={handleNext}
             disabled={currentStep === 1 && leadsCount === 0 && manualLeads.length === 0}
-            className="btn-primary px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl flex items-center group active:scale-95 disabled:opacity-50"
+            className="btn-primary px-8 py-3 rounded-lg font-bold text-xs uppercase tracking-widest shadow-sm flex items-center active:scale-95 disabled:opacity-50"
           >
-            {currentStep === 4 ? 'Launch Fleet' : 'Next Step'} <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" size={18} />
+            {currentStep === 4 ? 'Save & Launch' : 'Continue'} <ChevronRight className="ml-2" size={16} />
           </button>
         </div>
       </div>
 
-      <Stepper currentStep={currentStep} isEthereal={isEthereal} onStepClick={setCurrentStep} />
+      <Stepper currentStep={currentStep} onStepClick={setCurrentStep} />
 
       <div className="max-w-5xl mx-auto">
         <AnimatePresence mode="wait">
           {/* Step 1: Import Leads */}
           {currentStep === 1 && (
             <motion.div key="step1" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8">
-              <div className="glass-surface p-12 rounded-[3.5rem] border border-white/5 text-center space-y-10">
+              <div className="glass-surface p-10 rounded-xl border border-slate-200 shadow-sm text-center space-y-10">
                 {leadsCount === 0 ? (
                   <div className="space-y-10">
-                    <div className={`w-24 h-24 rounded-[2.5rem] flex items-center justify-center mx-auto ${isEthereal ? 'bg-emerald-50 text-[#10b981]' : 'bg-cyan-500/5 text-cyan-400'}`}>
-                      <Upload size={40} />
-                    </div>
-                    <div className="space-y-4">
-                      <h2 className={`text-3xl font-black font-heading ${isEthereal ? 'text-[#064e3b]' : 'text-white'}`}>Load Target Matrix</h2>
-                      <p className="text-slate-500 font-medium max-w-md mx-auto leading-relaxed">Transmit your lead CSV into the protocol to begin sequence generation.</p>
+                    <div className="space-y-2">
+                      <h2 className="text-2xl font-bold font-heading text-slate-900">Import Leads</h2>
+                      <p className="text-slate-500 text-sm max-w-md mx-auto">Upload a CSV or add leads manually to start your campaign.</p>
                     </div>
 
-                    <div className="max-w-2xl mx-auto space-y-8">
+                    <div className="max-w-2xl mx-auto space-y-6">
                       {importStep === 1 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <label className="block border-2 border-dashed border-slate-500/20 rounded-[2.5rem] p-12 text-center cursor-pointer hover:border-[#10b981] transition-all group bg-white/5">
-                            <Upload size={32} className="mx-auto mb-4 text-slate-500 group-hover:text-[#10b981] transition-colors" />
-                            <span className="text-xs font-black uppercase text-slate-500 tracking-widest">Select CSV Matrix</span>
+                          <label className="block border-2 border-dashed border-slate-200 rounded-xl p-8 text-center cursor-pointer hover:border-slate-900 transition-all group bg-white">
+                            <Upload size={32} className="mx-auto mb-4 text-slate-400 group-hover:text-slate-900 transition-colors" />
+                            <span className="text-xs font-bold uppercase text-slate-500 tracking-widest">Select CSV File</span>
                             <input type="file" className="hidden" accept=".csv" onChange={handleFileUpload} />
                           </label>
-                          <div className="glass-surface p-8 rounded-[2.5rem] border border-white/5 text-left space-y-4">
-                            <h4 className="text-[10px] font-black uppercase text-slate-400">Manual Node Entry</h4>
-                            <div className="grid grid-cols-2 gap-3">
-                              <input placeholder="First Name*" className="w-full h-10 px-4 rounded-xl text-xs bg-black/20 border border-white/5 outline-none focus:border-[#10b981]" value={manualInbound.firstName} onChange={e => setManualInbound({ ...manualInbound, firstName: e.target.value })} />
-                              <input placeholder="Last Name" className="w-full h-10 px-4 rounded-xl text-xs bg-black/20 border border-white/5 outline-none focus:border-[#10b981]" value={manualInbound.lastName} onChange={e => setManualInbound({ ...manualInbound, lastName: e.target.value })} />
+                          <div className="glass-surface p-6 rounded-xl border border-slate-200/50 text-left space-y-4">
+                            <h4 className="text-[10px] font-bold uppercase text-slate-500">Manual Entry</h4>
+                            <div className="grid grid-cols-2 gap-2">
+                              <input placeholder="First Name*" className="w-full h-10 px-3 rounded-lg text-xs border outline-none focus:ring-1 focus:ring-slate-900 bg-white border-slate-200" value={manualInbound.firstName} onChange={e => setManualInbound({ ...manualInbound, firstName: e.target.value })} />
+                              <input placeholder="Last Name" className="w-full h-10 px-3 rounded-lg text-xs border outline-none focus:ring-1 focus:ring-slate-900 bg-white border-slate-200" value={manualInbound.lastName} onChange={e => setManualInbound({ ...manualInbound, lastName: e.target.value })} />
                             </div>
-                            <input placeholder="Email Address*" className="w-full h-10 px-4 rounded-xl text-xs bg-black/20 border border-white/5 outline-none focus:border-[#10b981]" value={manualInbound.email} onChange={e => setManualInbound({ ...manualInbound, email: e.target.value })} />
-                            <input placeholder="Company Name" className="w-full h-10 px-4 rounded-xl text-xs bg-black/20 border border-white/5 outline-none focus:border-[#10b981]" value={manualInbound.company} onChange={e => setManualInbound({ ...manualInbound, company: e.target.value })} />
-                            <button onClick={handleManualAdd} className="w-full py-3 rounded-xl bg-[#10b981]/10 text-[#10b981] text-[10px] font-black uppercase tracking-widest hover:bg-[#10b981] hover:text-white transition-all">Add to Protocol</button>
+                            <input placeholder="Email Address*" className="w-full h-10 px-3 rounded-lg text-xs border outline-none focus:ring-1 focus:ring-slate-900 bg-white border-slate-200" value={manualInbound.email} onChange={e => setManualInbound({ ...manualInbound, email: e.target.value })} />
+                            <input placeholder="Company Name" className="w-full h-10 px-3 rounded-lg text-xs border outline-none focus:ring-1 focus:ring-slate-900 bg-white border-slate-200" value={manualInbound.company} onChange={e => setManualInbound({ ...manualInbound, company: e.target.value })} />
+                            <button onClick={handleManualAdd} className="w-full py-2.5 rounded-lg bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-slate-800 transition-all font-heading">Add Lead</button>
                           </div>
                         </div>
                       ) : (
-                        <div className="text-left bg-white/5 p-8 rounded-[2.5rem] border border-white/10">
-                          <FieldMapper theme={theme} headers={csvHeaders} onComplete={handleImportComplete} />
+                        <div className="text-left bg-white p-8 rounded-xl border border-slate-200 shadow-sm">
+                          <FieldMapper headers={csvHeaders} onComplete={handleImportComplete} />
                         </div>
                       )}
 
                       {manualLeads.length > 0 && (
-                        <div className="glass-surface p-6 rounded-3xl border border-white/5 max-h-[200px] overflow-y-auto">
+                        <div className="glass-surface p-6 rounded-3xl border border-slate-200 shadow-sm max-h-[200px] overflow-y-auto">
                           <h4 className="text-[9px] font-black uppercase text-slate-500 mb-4">{manualLeads.length} Manual Nodes Staged</h4>
                           <div className="space-y-2">
                             {manualLeads.map(l => (
-                              <div key={l.id} className="flex justify-between items-center text-xs p-2 bg-white/5 rounded-lg">
-                                <span className="text-slate-300 font-bold">{l.email}</span>
+                              <div key={l.id} className="flex justify-between items-center text-xs p-2 bg-slate-50 rounded-lg">
+                                <span className="text-slate-600 font-bold">{l.email}</span>
                                 <button onClick={() => setManualLeads(manualLeads.filter(ml => ml.id !== l.id))} className="text-rose-500"><X size={14} /></button>
                               </div>
                             ))}
@@ -492,11 +483,11 @@ const CampaignEditorPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }
                   </div>
                 ) : (
                   <div className="space-y-10">
-                    <div className={`w-28 h-28 rounded-[3rem] flex items-center justify-center mx-auto shadow-2xl ${isEthereal ? 'bg-[#10b981] text-white' : 'bg-[#00E5FF] text-slate-900'}`}>
+                    <div className="w-28 h-28 rounded-[3rem] flex items-center justify-center mx-auto shadow-2xl bg-[#10b981] text-white">
                       <CheckCircle2 size={48} />
                     </div>
                     <div className="space-y-4">
-                      <h2 className={`text-4xl font-black font-heading ${isEthereal ? 'text-[#064e3b]' : 'text-white'}`}>{leadsCount} Leads Ingested</h2>
+                      <h2 className="text-4xl font-black font-heading text-[#064e3b]">{leadsCount} Leads Ingested</h2>
                       <p className="text-slate-500 font-medium max-w-md mx-auto">Target matrix synchronized. Your outreach fleet is ready for sequence assignment.</p>
                     </div>
                     <button onClick={() => setLeadsCount(0)} className="text-[10px] font-black uppercase tracking-widest text-[#10b981] hover:underline">Import New Source</button>
@@ -510,20 +501,20 @@ const CampaignEditorPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }
           {currentStep === 2 && (
             <motion.div key="step2" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-12">
 
-              {/* Global Schedule Protocol */}
-              <div className="glass-surface p-10 rounded-[3rem] border border-white/5 space-y-8">
+              {/* Global Schedule */}
+              <div className="glass-surface p-8 rounded-xl border border-slate-200/50 space-y-6">
                 <div className="flex items-center justify-between">
-                  <h3 className={`text-xl font-black font-heading ${isEthereal ? 'text-[#064e3b]' : 'text-white'}`}>Execution Window</h3>
-                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Global Protocol</span>
+                  <h3 className="text-lg font-bold font-heading text-slate-900">Execution Window</h3>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Global Settings</span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-[#10b981] ml-1">Dispatch Timezone</label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Send Timezone</label>
                     <div className="relative">
                       <select
                         value={settings.timezone}
                         onChange={(e) => setSettings({ ...settings, timezone: e.target.value })}
-                        className={`w-full h-12 px-6 rounded-2xl text-xs font-bold focus:outline-none appearance-none ${isEthereal ? 'bg-slate-50 border-slate-100' : 'bg-black/20 border-white/5 text-white'}`}
+                        className="w-full h-10 px-4 rounded-lg text-xs font-bold focus:outline-none appearance-none border bg-white border-slate-200"
                       >
                         <option value="UTC">UTC (Universal Time)</option>
                         {Object.entries(TZ_SUGGESTIONS).map(([city, zone]) => (
@@ -533,22 +524,22 @@ const CampaignEditorPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }
                           <option key={tz} value={tz}>{tz}</option>
                         ))}
                       </select>
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center space-x-2 pointer-events-none">
-                        <Clock size={14} className="text-slate-500" />
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center space-x-2 pointer-events-none">
+                        <Clock size={12} className="text-slate-500" />
                       </div>
                     </div>
                   </div>
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Daily Start Time</label>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Daily Start Time</label>
                     <input
                       type="time"
                       value={settings.startTime}
                       onChange={(e) => setSettings({ ...settings, startTime: e.target.value })}
-                      className={`w-full h-12 px-6 rounded-2xl text-xs font-bold focus:outline-none ${isEthereal ? 'bg-slate-50 border-slate-100' : 'bg-black/20 border-white/5 text-white'}`}
+                      className="w-full h-10 px-4 rounded-lg text-xs font-bold focus:outline-none border bg-white border-slate-200"
                     />
                   </div>
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Smart Search</label>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Location Search</label>
                     <div className="relative">
                       <input
                         value={locationSearch}
@@ -561,7 +552,7 @@ const CampaignEditorPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }
                           }
                         }}
                         placeholder="Search city or region..."
-                        className={`w-full h-12 px-6 rounded-2xl text-xs font-bold focus:outline-none ${isEthereal ? 'bg-slate-50 border-slate-100' : 'bg-black/20 border-white/5 text-white'}`}
+                        className="w-full h-12 px-6 rounded-2xl text-xs font-bold focus:outline-none bg-slate-50 border-slate-100"
                       />
                       <Zap size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-400 opacity-50" />
                     </div>
@@ -576,61 +567,61 @@ const CampaignEditorPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }
               <div className="flex flex-col lg:flex-row gap-8 min-h-[600px]">
                 {/* Left Pane: Timeline */}
                 <div className="w-full lg:w-[350px] space-y-4">
-                  <div className="flex items-center justify-between px-4 mb-4">
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Flow Timeline</h4>
-                    <button onClick={addStep} className="p-2 rounded-xl bg-[#10b981]/10 text-[#10b981] hover:bg-[#10b981] hover:text-white transition-all">
-                      <Plus size={16} />
+                  <div className="flex items-center justify-between px-2 mb-4">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Sequence Timeline</h4>
+                    <button onClick={addStep} className="p-1.5 rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-sm">
+                      <Plus size={14} />
                     </button>
                   </div>
 
-                  <Reorder.Group axis="y" values={steps} onReorder={setSteps} className="space-y-4">
+                  <Reorder.Group axis="y" values={steps} onReorder={setSteps} className="space-y-3">
                     {steps.map((step, index) => (
                       <Reorder.Item
                         key={step.id}
                         value={step}
-                        className={`relative cursor-pointer transition-all ${activeStepId === step.id ? 'z-10' : 'z-0'}`}
+                        className="relative cursor-pointer transition-all z-0"
                         onClick={() => setActiveStepId(step.id)}
                       >
                         {/* Connecting Line */}
                         {index > 0 && (
-                          <div className="absolute -top-4 left-[22px] w-0.5 h-4 bg-slate-500/20" />
+                          <div className="absolute -top-3 left-[20px] w-[1px] h-3 bg-slate-200" />
                         )}
 
-                        <div className={`p-5 rounded-[2rem] border transition-all ${activeStepId === step.id
-                          ? 'glass-surface border-[#10b981] shadow-xl'
-                          : 'bg-white/5 border-transparent hover:border-white/10'
+                        <div className={`p-4 rounded-xl border transition-all ${activeStepId === step.id
+                          ? 'bg-slate-900 text-white shadow-md'
+                          : 'bg-white border-slate-200 hover:border-slate-400'
                           }`}>
-                          <div className="flex items-center space-x-4">
-                            <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-black ${activeStepId === step.id ? 'bg-[#10b981] text-white' : 'bg-slate-800 text-slate-400'}`}>
-                              <Mail size={18} />
+                          <div className="flex items-center space-x-3">
+                            <div className={`w-9 h-9 rounded flex items-center justify-center font-bold ${activeStepId === step.id ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                              <Mail size={16} />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className={`text-[10px] font-black uppercase tracking-widest ${activeStepId === step.id ? 'text-[#10b981]' : 'text-slate-500'}`}>Email Step {index + 1}</p>
-                              <p className={`text-xs font-bold truncate ${isEthereal ? 'text-[#064e3b]' : 'text-white'}`}>{step.subject || '(No Subject)'}</p>
+                              <p className={`text-[9px] font-bold uppercase tracking-widest ${activeStepId === step.id ? 'text-white/60' : 'text-slate-500'}`}>Step {index + 1}</p>
+                              <p className={`text-xs font-bold truncate ${activeStepId === step.id ? 'text-white' : 'text-slate-900'}`}>{step.subject || '(No Subject)'}</p>
                             </div>
                             {steps.length > 1 && (
-                              <button onClick={(e) => { e.stopPropagation(); removeStep(step.id); }} className="opacity-0 group-hover:opacity-100 p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all">
-                                <Trash2 size={14} />
+                              <button onClick={(e) => { e.stopPropagation(); removeStep(step.id); }} className="opacity-0 group-hover:opacity-100 p-1.5 text-rose-500 hover:bg-rose-50 rounded transition-all">
+                                <Trash2 size={12} />
                               </button>
                             )}
                           </div>
                         </div>
 
                         {/* Wait Delay Indicator */}
-                        <div className="flex items-center space-x-3 px-4 py-3">
-                          <div className="w-11 flex justify-center">
-                            <Clock size={14} className="text-slate-600" />
+                        <div className="flex items-center space-x-3 px-3 py-2">
+                          <div className="w-9 flex justify-center">
+                            <Clock size={12} className="text-slate-400" />
                           </div>
                           <div className="flex items-center space-x-2">
-                            <span className="text-[10px] font-black text-slate-500 uppercase">Wait for</span>
+                            <span className="text-[9px] font-bold text-slate-500 uppercase">Wait</span>
                             <input
                               type="number"
                               value={step.delayDays}
                               onChange={(e) => updateStep(step.id, { delayDays: parseInt(e.target.value) })}
                               onClick={(e) => e.stopPropagation()}
-                              className="w-10 h-6 bg-white/5 border border-white/10 rounded text-center text-[10px] font-black text-[#10b981] outline-none"
+                              className="w-8 h-5 bg-white border border-slate-200 rounded text-center text-[10px] font-bold text-slate-900 outline-none"
                             />
-                            <span className="text-[10px] font-black text-slate-500 uppercase whitespace-nowrap">day then</span>
+                            <span className="text-[9px] font-bold text-slate-500 uppercase whitespace-nowrap">days then</span>
                           </div>
                         </div>
                       </Reorder.Item>
@@ -639,27 +630,22 @@ const CampaignEditorPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }
                 </div>
 
                 {/* Right Pane: Editor */}
-                <div className="flex-1 glass-surface rounded-[3rem] border border-white/5 overflow-hidden shadow-2xl flex flex-col">
+                <div className="flex-1 glass-surface rounded-xl border border-slate-200 overflow-hidden shadow-sm flex flex-col">
                   {activeStepId ? (
                     (() => {
                       const activeStep = steps.find(s => s.id === activeStepId);
                       if (!activeStep) return null;
                       return (
                         <>
-                          <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                          <div className="p-6 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
                             <div className="flex items-center space-x-4">
-                              <div className="w-10 h-10 rounded-xl bg-[#10b981] flex items-center justify-center text-white">
-                                <Layout size={20} />
+                              <div className="w-9 h-9 rounded bg-slate-900 flex items-center justify-center text-white">
+                                <Layout size={18} />
                               </div>
                               <div>
-                                <h4 className={`text-lg font-black font-heading ${isEthereal ? 'text-[#064e3b]' : 'text-white'}`}>Edit Transmission Node</h4>
-                                <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Protocol Generation Layer</span>
+                                <h4 className="text-sm font-bold font-heading text-slate-900">Edit Email Content</h4>
+                                <span className="text-[10px] font-bold uppercase text-slate-500 tracking-widest">Step {activeStep.order}</span>
                               </div>
-                            </div>
-                            <div className="flex items-center space-x-3">
-                              <button className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-white/5 text-[10px] font-black uppercase tracking-widest text-[#10b981] hover:bg-white/10 transition-all">
-                                <Zap size={14} /> <span>AI Optimize</span>
-                              </button>
                             </div>
                           </div>
 
@@ -669,63 +655,59 @@ const CampaignEditorPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }
                                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Subject Line</label>
                                 <div className="flex items-center space-x-4">
                                   <div className="flex items-center space-x-1.5 cursor-pointer group" onClick={() => updateStep(activeStep.id, { subject: activeStep.subject + ' {{first_name}}' })}>
-                                    <span className="text-[#10b981] font-black text-[10px]">{'{ }'}</span>
-                                    <span className="text-[10px] font-black uppercase text-slate-500 group-hover:text-[#10b981] transition-colors">Variables</span>
+                                    <span className="text-slate-900 font-bold text-xs">{'{ }'}</span>
+                                    <span className="text-[10px] font-bold uppercase text-slate-500 group-hover:text-slate-900 transition-colors">Variables</span>
                                   </div>
                                 </div>
                               </div>
                               <input
                                 value={activeStep.subject}
                                 onChange={(e) => updateStep(activeStep.id, { subject: e.target.value })}
-                                placeholder="Enter subject header..."
-                                className={`w-full h-14 px-8 rounded-2xl text-sm font-bold focus:shadow-[0_0_30px_rgba(16,185,129,0.1)] transition-all ${isEthereal ? 'bg-slate-50 border-slate-100 text-slate-700' : 'bg-black/20 border-white/5 text-white'}`}
+                                placeholder="Enter subject line..."
+                                className={`w-full h-10 px-4 rounded-lg text-sm font-medium border focus:outline-none focus:ring-1 focus:ring-slate-900 transition-all ${isEthereal ? 'bg-white border-slate-200 text-slate-900' : 'bg-black/20 border-white/5 text-white'}`}
                               />
                             </div>
 
                             <div className="space-y-3">
                               {/* Toolbar */}
-                              <div className={`p-4 rounded-2xl border flex items-center justify-between ${isEthereal ? 'bg-slate-50 border-slate-100' : 'bg-white/5 border-white/5'}`}>
-                                <div className="flex items-center space-x-6">
-                                  <div className="flex items-center space-x-4 border-r border-white/10 pr-6">
-                                    <button className="text-slate-500 hover:text-[#10b981] transition-colors"><Mail size={16} /></button>
+                              <div className="p-3 rounded-t-lg border border-b-0 flex items-center justify-between bg-slate-50 border-slate-200">
+                                <div className="flex items-center space-x-4">
+                                  <div className="flex items-center space-x-4 border-r border-slate-200 pr-4">
+                                    <button className="text-slate-500 hover:text-slate-900 transition-colors"><Mail size={14} /></button>
                                     <div className="relative group">
-                                      <button className="flex items-center space-x-1 text-slate-500 hover:text-[#10b981] transition-colors">
-                                        <span className="font-black text-sm">{'{ }'}</span>
+                                      <button className="flex items-center space-x-1 text-slate-500 hover:text-slate-900 transition-colors">
+                                        <span className="font-bold text-sm">{'{ }'}</span>
                                       </button>
-                                      {/* Simple tags dropdown mockup */}
-                                      <div className="absolute top-full left-0 mt-2 w-48 bg-slate-900 border border-white/10 rounded-xl shadow-2xl p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                                      <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-slate-200 rounded-lg shadow-xl p-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
                                         {['first_name', 'last_name', 'company_name', 'email'].map(tag => (
                                           <button
                                             key={tag}
                                             onClick={() => updateStep(activeStep.id, { body: activeStep.body + ` {{${tag}}}` })}
-                                            className="w-full text-left px-4 py-2 hover:bg-white/5 rounded-lg text-[10px] font-black uppercase text-slate-400 hover:text-white"
+                                            className="w-full text-left px-3 py-1.5 hover:bg-slate-50 rounded text-[10px] font-bold uppercase text-slate-600 hover:text-slate-900"
                                           >
                                             {tag.replace('_', ' ')}
                                           </button>
                                         ))}
                                       </div>
                                     </div>
-                                    <button className="text-slate-500 hover:text-[#10b981] transition-colors"><Zap size={16} /></button>
+                                    <button className="text-slate-500 hover:text-slate-900 transition-colors"><Zap size={14} /></button>
                                   </div>
                                   <div className="flex items-center space-x-4">
-                                    <button className="text-slate-500 hover:text-[#10b981] transition-colors font-serif italic text-lg">A</button>
-                                    <button className="text-slate-500 hover:text-[#10b981] transition-colors"><FileText size={16} /></button>
+                                    <button className="text-slate-500 hover:text-slate-900 transition-colors font-serif italic text-base">A</button>
+                                    <button className="text-slate-500 hover:text-slate-900 transition-colors"><FileText size={14} /></button>
                                     <button onClick={() => {
                                       const url = window.prompt('Enter Link Target URL:');
                                       if (url) updateStep(activeStep.id, { body: activeStep.body + ` [LINK](${url})` });
-                                    }} className="text-slate-500 hover:text-[#10b981] transition-colors"><ArrowRight size={16} /></button>
+                                    }} className="text-slate-500 hover:text-slate-900 transition-colors"><ArrowRight size={14} /></button>
                                   </div>
-                                </div>
-                                <div className="flex items-center space-x-4">
-                                  <button className="text-slate-700 text-xs font-black">Aa</button>
                                 </div>
                               </div>
                               <textarea
-                                rows={12}
+                                rows={10}
                                 value={activeStep.body}
                                 onChange={(e) => updateStep(activeStep.id, { body: e.target.value })}
-                                className={`w-full p-10 rounded-[2.5rem] text-sm leading-relaxed focus:shadow-[0_0_30px_rgba(16,185,129,0.1)] transition-all resize-none ${isEthereal ? 'bg-slate-50 border-slate-100 text-slate-700' : 'bg-black/20 border-white/5 text-slate-300'}`}
-                                placeholder="Start typing your advanced outreach matrix..."
+                                className={`w-full p-6 rounded-b-lg border text-sm leading-relaxed focus:outline-none focus:ring-1 focus:ring-slate-900 transition-all resize-none ${isEthereal ? 'bg-white border-slate-200 text-slate-900' : 'bg-black/20 border-white/5 text-slate-300'}`}
+                                placeholder="Start typing your email message..."
                               />
                             </div>
                           </div>
@@ -742,11 +724,11 @@ const CampaignEditorPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }
                   )}
                 </div>
               </div>
-              <button onClick={addStep} className={`w-full py-10 border-2 border-dashed rounded-[3.5rem] transition-all flex flex-col items-center justify-center space-y-3 group ${isEthereal ? 'border-slate-200 text-slate-400 hover:bg-[#10b981]/5 hover:text-[#10b981] hover:border-[#10b981]/20' : 'border-white/5 text-slate-600 hover:bg-[#00E5FF]/5 hover:text-[#00E5FF] hover:border-[#00E5FF]/20'}`}>
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${isEthereal ? 'bg-slate-50 text-slate-400 group-hover:bg-[#10b981] group-hover:text-white' : 'bg-white/5 text-slate-500 group-hover:bg-[#00E5FF] group-hover:text-slate-900'}`}>
-                  <Plus size={28} />
+              <button onClick={addStep} className="w-full py-8 border-2 border-dashed rounded-xl transition-all flex flex-col items-center justify-center space-y-2 group border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-400">
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center transition-all bg-slate-100 text-slate-400 group-hover:bg-slate-900 group-hover:text-white">
+                  <Plus size={20} />
                 </div>
-                <span className="text-xs font-black uppercase tracking-[0.2em]">Add Transmission Node</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest">Add Email Step</span>
               </button>
             </motion.div>
           )}
@@ -755,66 +737,66 @@ const CampaignEditorPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }
           {currentStep === 3 && (
             <motion.div key="step3" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="glass-surface p-10 rounded-[3rem] border border-white/5 space-y-8">
+                <div className="glass-surface p-8 rounded-xl border border-slate-200 shadow-sm space-y-6">
                   <div className="flex items-center justify-between">
-                    <h3 className={`text-xl font-black font-heading ${isEthereal ? 'text-[#064e3b]' : 'text-white'}`}>Dispatch Fleet</h3>
-                    <span className="text-[10px] font-black text-slate-500 uppercase">{selectedInboxes.length} SELECTED</span>
+                    <h3 className="text-lg font-bold font-heading text-slate-900">Sender Accounts</h3>
+                    <span className="text-[10px] font-bold text-slate-500 uppercase">{selectedInboxes.length} Selected</span>
                   </div>
-                  <div className="space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+                  <div className="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
                     {inboxes.map(inbox => (
                       <div key={inbox.id} onClick={() => {
                         if (selectedInboxes.includes(inbox.id)) setSelectedInboxes(selectedInboxes.filter(i => i !== inbox.id));
                         else setSelectedInboxes([...selectedInboxes, inbox.id]);
-                      }} className={`p-5 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${selectedInboxes.includes(inbox.id)
-                        ? (isEthereal ? 'bg-[#10b981]/5 border-[#10b981]/30' : 'bg-[#00E5FF]/5 border-[#00E5FF]/30')
-                        : (isEthereal ? 'bg-white border-slate-100 hover:border-slate-200' : 'bg-black/20 border-white/5 hover:border-white/20')
+                      }} className={`p-4 rounded-lg border cursor-pointer transition-all flex items-center justify-between ${selectedInboxes.includes(inbox.id)
+                        ? (isEthereal ? 'bg-slate-50 border-slate-900' : 'bg-blue-600/10 border-blue-600/30')
+                        : (isEthereal ? 'bg-white border-slate-200 hover:border-slate-400' : 'bg-black/20 border-white/5 hover:border-white/20')
                         }`}>
-                        <div className="flex items-center space-x-4">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${inbox.status === 'authenticated' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
-                            <Mail size={18} />
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-8 h-8 rounded flex items-center justify-center ${inbox.status === 'authenticated' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+                            <Mail size={14} />
                           </div>
                           <div>
-                            <p className={`text-sm font-black ${isEthereal ? 'text-[#064e3b]' : 'text-slate-200'}`}>{inbox.email}</p>
+                            <p className="text-xs font-bold text-slate-900">{inbox.email}</p>
                             <p className="text-[10px] font-bold text-slate-500 uppercase">{inbox.provider}</p>
                           </div>
                         </div>
                         <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${selectedInboxes.includes(inbox.id)
-                          ? (isEthereal ? 'bg-[#10b981] border-[#10b981]' : 'bg-[#00E5FF] border-[#00E5FF]')
+                          ? 'bg-[#10b981] border-[#10b981]'
                           : 'border-slate-500/30'
                           }`}>
-                          {selectedInboxes.includes(inbox.id) && <CheckCircle2 size={14} className={isEthereal ? 'text-white' : 'text-slate-900'} />}
+                          {selectedInboxes.includes(inbox.id) && <CheckCircle2 size={14} className="text-white" />}
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="glass-surface p-10 rounded-[3rem] border border-white/5 space-y-10">
-                  <h3 className={`text-xl font-black font-heading ${isEthereal ? 'text-[#064e3b]' : 'text-white'}`}>Safety Protocols</h3>
-                  <div className="space-y-8">
+                <div className="glass-surface p-8 rounded-xl border border-slate-200 shadow-sm space-y-8">
+                  <h3 className="text-lg font-bold font-heading text-slate-900">Campaign Settings</h3>
+                  <div className="space-y-6">
                     {[
-                      { key: 'stopOnReply', label: 'Stop on Reply', desc: 'Auto-cease sequence after lead engagement' },
-                      { key: 'trackOpens', label: 'Open Tracking', desc: 'Enable pixel-based open monitoring' },
-                      { key: 'workDaysOnly', label: 'Work Days Only', desc: 'Restrict transmission to Mon-Fri' },
+                      { key: 'stopOnReply', label: 'Stop on Reply', desc: 'Auto-pause sequence after lead reply' },
+                      { key: 'trackOpens', label: 'Open Tracking', desc: 'Track email opens via pixel' },
+                      { key: 'workDaysOnly', label: 'Work Days Only', desc: 'Send emails Mon-Fri' },
                     ].map(protocol => (
                       <div key={protocol.key} className="flex items-center justify-between group">
                         <div className="flex-1">
-                          <p className={`font-black text-sm ${isEthereal ? 'text-[#064e3b]' : 'text-slate-200'}`}>{protocol.label}</p>
+                          <p className="font-bold text-sm text-slate-900">{protocol.label}</p>
                           <p className="text-[10px] text-slate-500 font-bold uppercase">{protocol.desc}</p>
                         </div>
-                        <button onClick={() => setSettings({ ...settings, [protocol.key]: !((settings as any)[protocol.key]) })} className={`w-12 h-6 rounded-full transition-all relative ${(settings as any)[protocol.key] ? (isEthereal ? 'bg-[#10b981]' : 'bg-[#00E5FF]') : 'bg-slate-700'
+                        <button onClick={() => setSettings({ ...settings, [protocol.key]: !((settings as any)[protocol.key]) })} className={`w-10 h-5 rounded-full transition-all relative ${(settings as any)[protocol.key] ? 'bg-slate-900' : 'bg-slate-300'
                           }`}>
-                          <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all ${(settings as any)[protocol.key] ? 'right-1' : 'left-1'}`} />
+                          <div className={`w-3 h-3 bg-white rounded-full absolute top-1 transition-all ${(settings as any)[protocol.key] ? 'right-1' : 'left-1'}`} />
                         </button>
                       </div>
                     ))}
-                    <div className="pt-4 border-t border-white/5">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-4">Daily Volume Limit (Per Inbox)</label>
-                      <input type="range" min="10" max="200" step="10" value={settings.dailyLimit} onChange={(e) => setSettings({ ...settings, dailyLimit: parseInt(e.target.value) })} className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#10b981]" />
-                      <div className="flex justify-between mt-2 text-[10px] font-black text-slate-500">
-                        <span>10 EMAILS</span>
-                        <span className={isEthereal ? 'text-[#10b981]' : 'text-[#00E5FF]'}>{settings.dailyLimit} EMAILS</span>
-                        <span>200 EMAILS</span>
+                    <div className="pt-4 border-t border-slate-200">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-4">Daily Sending Limit (Per Account)</label>
+                      <input type="range" min="10" max="200" step="10" value={settings.dailyLimit} onChange={(e) => setSettings({ ...settings, dailyLimit: parseInt(e.target.value) })} className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-900" />
+                      <div className="flex justify-between mt-2 text-[10px] font-bold text-slate-500">
+                        <span>10</span>
+                        <span className="text-slate-900 font-bold">{settings.dailyLimit} Emails</span>
+                        <span>200</span>
                       </div>
                     </div>
                   </div>
@@ -826,58 +808,55 @@ const CampaignEditorPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }
           {/* Step 4: Preview */}
           {currentStep === 4 && (
             <motion.div key="step4" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="space-y-8">
-              <div className="glass-surface p-12 rounded-[4rem] border border-white/5 overflow-hidden relative">
-                <div className={`absolute top-0 right-0 w-64 h-64 blur-[120px] opacity-20 ${isEthereal ? 'bg-[#10b981]' : 'bg-[#00E5FF]'}`} />
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center relative z-10">
-                  <div className="space-y-4">
-                    <Users className={`mx-auto ${isEthereal ? 'text-[#10b981]' : 'text-[#00E5FF]'}`} size={32} />
+              <div className="glass-surface p-10 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                  <div className="space-y-2">
+                    <Users className="mx-auto text-slate-400" size={24} />
                     <div>
-                      <p className="text-3xl font-black text-white">{leadsCount}</p>
-                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active Leads</p>
+                      <p className="text-2xl font-bold text-slate-900">{leadsCount}</p>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Target Leads</p>
                     </div>
                   </div>
-                  <div className="space-y-4 border-x border-white/5">
-                    <Mail className={`mx-auto ${isEthereal ? 'text-[#10b981]' : 'text-[#00E5FF]'}`} size={32} />
+                  <div className="space-y-2 border-x border-slate-100">
+                    <Mail className="mx-auto text-slate-400" size={24} />
                     <div>
-                      <p className="text-3xl font-black text-white">{selectedInboxes.length}</p>
-                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Dispatch Inboxes</p>
+                      <p className="text-2xl font-bold text-slate-900">{selectedInboxes.length}</p>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Sender Accounts</p>
                     </div>
                   </div>
-                  <div className="space-y-4">
-                    <Zap className={`mx-auto ${isEthereal ? 'text-[#10b981]' : 'text-[#00E5FF]'}`} size={32} />
+                  <div className="space-y-2">
+                    <Zap className="mx-auto text-slate-400" size={24} />
                     <div>
-                      <p className="text-3xl font-black text-white">{steps.length}</p>
-                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Sequence Steps</p>
+                      <p className="text-2xl font-bold text-slate-900">{steps.length}</p>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Campaign Steps</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-16 p-10 bg-white/5 rounded-[3rem] border border-white/5">
-                  <div className="flex items-center space-x-3 mb-8">
-                    <ShieldAlert size={18} className="text-amber-500" />
-                    <h4 className="text-sm font-black uppercase tracking-widest text-slate-200">Pre-Dispatch Checklist</h4>
+                <div className="mt-10 p-8 bg-slate-50 rounded-lg border border-slate-200">
+                  <div className="flex items-center space-x-2 mb-6">
+                    <CheckCircle2 size={16} className="text-slate-900" />
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-700">Launch Checklist</h4>
                   </div>
-                  <div className="grid grid-cols-2 gap-6">
-                    {['Spintax Validated', 'Unsubscribe Ready', 'Rotation Active', 'IMAP Synced'].map(check => (
-                      <div key={check} className="flex items-center space-x-4 text-xs font-bold text-slate-400">
-                        <CheckCircle2 className="text-[#10b981]" size={16} />
+                  <div className="grid grid-cols-2 gap-4">
+                    {['Variables Validated', 'Unsubscribe Link Included', 'Sender Rotation Active', 'IMAP Connection Status'].map(check => (
+                      <div key={check} className="flex items-center space-x-3 text-xs font-medium text-slate-600">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                         <span>{check}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="mt-12 flex flex-col items-center space-y-4">
-                  <div className="flex items-center space-x-4 w-full justify-center">
-                    <button onClick={() => setIsTestSendOpen(true)} className="px-8 py-4 rounded-[2rem] border border-white/10 font-black text-xs uppercase tracking-widest hover:bg-white/5 transition-all flex items-center">
-                      <Zap size={16} className="mr-2 text-amber-500" /> Test Send
+                <div className="mt-10 flex flex-col items-center space-y-4">
+                  <div className="flex items-center space-x-3 w-full justify-center">
+                    <button onClick={() => setIsTestSendOpen(true)} className="px-6 py-3 rounded-lg border border-slate-200 font-bold text-xs uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center">
+                      <Mail size={16} className="mr-2" /> Send Test Email
                     </button>
-                    <button onClick={() => handleSave()} className="btn-primary px-12 py-4 rounded-[2rem] font-black text-xs uppercase tracking-[0.2em] shadow-[0_0_40px_rgba(16,185,129,0.2)] hover:shadow-[0_0_60px_rgba(16,185,129,0.3)] transition-all">
-                      Initiate Global Sequence
+                    <button onClick={() => handleSave()} className="btn-primary px-10 py-3 rounded-lg font-bold text-xs uppercase tracking-widest shadow-md transition-all">
+                      Start Campaign
                     </button>
                   </div>
-                  <p className="text-[10px] font-bold text-slate-600 mt-6 uppercase tracking-[0.2em]">Authorized Signature Required • Version 2.0.4</p>
                 </div>
               </div>
             </motion.div>
@@ -889,10 +868,10 @@ const CampaignEditorPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }
       <AnimatePresence>
         {isTestSendOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="glass-surface p-8 rounded-[2.5rem] border border-white/10 w-full max-w-md space-y-6">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="glass-surface p-8 rounded-xl border border-slate-200 w-full max-w-md space-y-6">
               <div className="flex justify-between items-center">
-                <h3 className={`text-xl font-black font-heading ${isEthereal ? 'text-[#064e3b]' : 'text-white'}`}>Test Transmission</h3>
-                <button onClick={() => setIsTestSendOpen(false)} className="text-slate-500 hover:text-white"><X size={20} /></button>
+                <h3 className="text-lg font-bold font-heading text-slate-900">Send Test Email</h3>
+                <button onClick={() => setIsTestSendOpen(false)} className="text-slate-500 hover:text-slate-900"><X size={20} /></button>
               </div>
               <div className="space-y-4">
                 <div>

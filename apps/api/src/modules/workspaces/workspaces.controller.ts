@@ -7,7 +7,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 @Controller('workspaces')
 @UseGuards(JwtAuthGuard)
 export class WorkspacesController {
-  constructor(private readonly workspacesService: WorkspacesService) {}
+  constructor(private readonly workspacesService: WorkspacesService) { }
 
   @Post()
   async create(@Body() dto: CreateWorkspaceDto, @CurrentUser() user: any) {
@@ -22,5 +22,11 @@ export class WorkspacesController {
   @Get(':id')
   async findOne(@Param('id') id: string, @CurrentUser() user: any) {
     return this.workspacesService.findByIdForUser(id, user.id);
+  }
+
+  @Post(':id') // Using Post for compatibility or Patch
+  async update(@Param('id') id: string, @Body() data: any, @CurrentUser() user: any) {
+    await this.workspacesService.findByIdForUser(id, user.id); // Guard
+    return this.workspacesService.update(id, data);
   }
 }
