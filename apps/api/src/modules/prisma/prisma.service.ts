@@ -41,7 +41,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
             const modelsWithWorkspace = [
               'Inbox', 'Domain', 'Lead', 'Campaign', 'SendingLog',
               'ReplyLog', 'Member', 'WarmupAccount', 'SequenceStep',
-              'AuditLog', 'Notification', 'DeliverabilityTest'
+              'AuditLog', 'Notification', 'DeliverabilityTest', 'BounceLog'
             ];
 
             // Models that are global or isolated by other means (e.g., User by ID)
@@ -51,17 +51,15 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
               return query(args);
             }
 
-            // Type-safe argument injection
-            const anyArgs = args as any || {};
-            anyArgs.where = anyArgs.where || {};
-
             // Read & Write operations isolation
             if (['findFirst', 'findMany', 'findUnique', 'count', 'update', 'delete', 'updateMany', 'deleteMany'].includes(operation)) {
+              const anyArgs = args as any || {};
               anyArgs.where = { ...anyArgs.where, workspaceId };
             }
 
             // Special Case: Upsert
             if (operation === 'upsert') {
+              const anyArgs = args as any || {};
               anyArgs.create = { ...anyArgs.create, workspaceId };
               anyArgs.update = { ...anyArgs.update, workspaceId };
               anyArgs.where = { ...anyArgs.where, workspaceId };
@@ -69,6 +67,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
 
             // Special Case: Create
             if (['create', 'createMany'].includes(operation)) {
+              const anyArgs = args as any || {};
               if (Array.isArray(anyArgs.data)) {
                 anyArgs.data = anyArgs.data.map((item: any) => ({ ...item, workspaceId }));
               } else {
@@ -90,10 +89,11 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   get lead() { return this.client.lead; }
   get inbox() { return this.client.inbox; }
   get campaign() { return this.client.campaign; }
-  get sendingLog() { return this.client.sendingLog; }
-  get replyLog() { return this.client.replyLog; }
   get domain() { return this.client.domain; }
   get warmupAccount() { return this.client.warmupAccount; }
+  get sendingLog() { return this.client.sendingLog; }
+  get replyLog() { return this.client.replyLog; }
+  get bounceLog() { return this.client.bounceLog; }
   get sequenceStep() { return this.client.sequenceStep; }
   get auditLog() { return this.client.auditLog; }
   get notification() { return this.client.notification; }

@@ -30,6 +30,7 @@ model User {
   resetTokenExpires   DateTime?
 
   memberships   Member[]
+  auditLogs     AuditLog[]
 }
 
 model Workspace {
@@ -51,6 +52,8 @@ model Workspace {
   auditLogs     AuditLog[]
   notifications Notification[]
   deliverabilityTests DeliverabilityTest[]
+  warmupAccounts WarmupAccount[]
+  sequenceSteps  SequenceStep[]
 }
 
 model Member {
@@ -103,12 +106,17 @@ model Inbox {
   workspace        Workspace  @relation(fields: [workspaceId], references: [id])
   domain           Domain     @relation(fields: [domainId], references: [id])
   warmupAccount    WarmupAccount?
+  sendingLogs      SendingLog[]
+  bounceLogs       BounceLog[]
+  replyLogs        ReplyLog[]
+  deliverabilityTests DeliverabilityTest[]
   @@index([workspaceId])
   @@index([status])
 }
 
 model WarmupAccount {
   id                String    @id @default(uuid())
+  workspaceId       String
   inboxId           String    @unique
   dailyLimit        Int       @default(50)
   rampUpPerDay      Int       @default(5)
@@ -119,6 +127,8 @@ model WarmupAccount {
   reputationScore   Int       @default(100)
   createdAt         DateTime  @default(now())
   inbox             Inbox     @relation(fields: [inboxId], references: [id])
+  workspace         Workspace @relation(fields: [workspaceId], references: [id])
+  @@index([workspaceId])
 }
 
 model Lead {
@@ -142,6 +152,9 @@ model Lead {
   @@index([campaignId])
   @@index([status])
   @@index([email])
+  sendingLogs  SendingLog[]
+  bounceLogs   BounceLog[]
+  replyLogs    ReplyLog[]
 }
 
 model Campaign {
@@ -155,12 +168,16 @@ model Campaign {
   workspace   Workspace  @relation(fields: [workspaceId], references: [id])
   sequences   SequenceStep[]
   leads       Lead[]
+  sendingLogs SendingLog[]
+  bounceLogs  BounceLog[]
+  replyLogs   ReplyLog[]
   @@index([workspaceId])
   @@index([status])
 }
 
 model SequenceStep {
   id          String    @id @default(uuid())
+  workspaceId String
   campaignId  String
   order       Int
   subject     String
@@ -172,7 +189,9 @@ model SequenceStep {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   campaign    Campaign  @relation(fields: [campaignId], references: [id])
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
   @@index([campaignId])
+  @@index([workspaceId])
 }
 
 model SendingLog {
@@ -187,6 +206,10 @@ model SendingLog {
   errorMessage String?
   createdAt    DateTime  @default(now())
   workspace    Workspace @relation(fields: [workspaceId], references: [id])
+  campaign     Campaign  @relation(fields: [campaignId], references: [id])
+  inbox        Inbox     @relation(fields: [inboxId], references: [id])
+  lead         Lead      @relation(fields: [leadId], references: [id])
+  bounceLogs   BounceLog[]
   @@index([workspaceId, sentAt])
   @@index([campaignId])
   @@index([inboxId])
@@ -204,6 +227,10 @@ model BounceLog {
   rawReason    String?   @db.Text
   createdAt    DateTime  @default(now())
   workspace    Workspace @relation(fields: [workspaceId], references: [id])
+  campaign     Campaign  @relation(fields: [campaignId], references: [id])
+  inbox        Inbox     @relation(fields: [inboxId], references: [id])
+  lead         Lead      @relation(fields: [leadId], references: [id])
+  sendingLog   SendingLog? @relation(fields: [sendingLogId], references: [id])
   @@index([workspaceId, createdAt])
   @@index([campaignId])
   @@index([inboxId])
@@ -219,7 +246,11 @@ model ReplyLog {
   body           String    @db.Text
   classification String?
   receivedAt     DateTime  @default(now())
+  messageId      String?   @unique
   workspace      Workspace @relation(fields: [workspaceId], references: [id])
+  campaign       Campaign  @relation(fields: [campaignId], references: [id])
+  inbox          Inbox     @relation(fields: [inboxId], references: [id])
+  lead           Lead      @relation(fields: [leadId], references: [id])
   @@index([workspaceId, receivedAt])
   @@index([campaignId])
   @@index([inboxId])
@@ -237,6 +268,7 @@ model AuditLog {
   ipAddress    String?
   createdAt    DateTime  @default(now())
   workspace    Workspace @relation(fields: [workspaceId], references: [id])
+  user         User?     @relation(fields: [userId], references: [id])
   @@index([workspaceId, createdAt])
   @@index([entityId])
 }
@@ -268,6 +300,7 @@ model DeliverabilityTest {
   body            String?   @db.Text
   createdAt       DateTime  @default(now())
   workspace       Workspace @relation(fields: [workspaceId], references: [id])
+  inbox           Inbox?    @relation(fields: [inboxId], references: [id])
   @@index([workspaceId])
   @@index([inboxId])
 }

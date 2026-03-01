@@ -29,7 +29,7 @@ export class RepliesService {
     const { from, subject, body, headers, receivedAt, messageId } = rawReply;
 
     // 1. Idempotency Check: Avoid processing the same messageId twice
-    const existing = await (this.prisma as any).replyLog.findFirst({
+    const existing = await this.prisma.replyLog.findFirst({
       where: { messageId, workspaceId }
     });
     if (existing) return;
@@ -39,8 +39,8 @@ export class RepliesService {
     let lead = null;
 
     if (logId) {
-      const log = await (this.prisma as any).sendingLog.findUnique({ where: { id: logId } });
-      if (log) lead = await (this.prisma as any).lead.findUnique({ where: { id: log.leadId } });
+      const log = await this.prisma.sendingLog.findUnique({ where: { id: logId } });
+      if (log) lead = await this.prisma.lead.findUnique({ where: { id: log.leadId } });
     }
 
     if (!lead) {
@@ -57,12 +57,12 @@ export class RepliesService {
     const { category } = await this.classifyReply(body);
 
     // 4. Atomic Multi-Operation: Save Log & Update Lead State
-    await (this.prisma as any).$transaction([
-      (this.prisma as any).replyLog.create({
+    await this.prisma.$transaction([
+      this.prisma.replyLog.create({
         data: {
           workspaceId,
           leadId: lead.id,
-          campaignId: lead.currentCampaignId,
+          campaignId: lead.campaignId || lead.currentCampaignId || '',
           inboxId,
           messageId,
           subject,
@@ -71,7 +71,7 @@ export class RepliesService {
           receivedAt: new Date(receivedAt || Date.now()),
         }
       }),
-      (this.prisma as any).lead.update({
+      this.prisma.lead.update({
         where: { id: lead.id },
         data: {
           status: category === 'unsubscribe' ? LeadStatus.UNSUBSCRIBED : LeadStatus.REPLIED,
@@ -103,7 +103,7 @@ export class RepliesService {
   async findAll(workspaceId: string, campaignId?: string) {
     const where: any = { workspaceId };
     if (campaignId) where.campaignId = campaignId;
-    return (this.prisma as any).replyLog.findMany({
+    return this.prisma.replyLog.findMany({
       where,
       include: { lead: true },
       orderBy: { receivedAt: 'desc' }
@@ -115,7 +115,7 @@ export class RepliesService {
    * Sends an outbound email to a lead as a threaded response to a specific message.
    */
   async sendReply(workspaceId: string, replyId: string, body: string) {
-    const replyLog = await (this.prisma as any).replyLog.findUnique({
+    const replyLog = await this.prisma.replyLog.findUnique({
       where: { id: replyId },
       include: { lead: true, inbox: true }
     });

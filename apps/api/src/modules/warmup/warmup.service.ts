@@ -18,7 +18,7 @@ export class WarmupService {
   }
 
   async getPoolStats(workspaceId: string) {
-    return this.prisma.client.warmupAccount.findMany({
+    return this.prisma.warmupAccount.findMany({
       where: { inbox: { workspaceId } },
       include: { inbox: true }
     });
@@ -36,8 +36,9 @@ export class WarmupService {
       let account = await tx.warmupAccount.findUnique({ where: { inboxId } });
 
       if (!account && enabled) {
-        account = await this.prisma.client.warmupAccount.create({
+        account = await this.prisma.warmupAccount.create({
           data: {
+            workspaceId,
             inboxId,
             dailyLimit: 50,
             rampUpPerDay: 5,
@@ -114,7 +115,7 @@ export class WarmupService {
 
     const today = new Date().toISOString().split('T')[0];
 
-    const activeAccounts: any[] = await this.prisma.client.warmupAccount.findMany({
+    const activeAccounts: any[] = await this.prisma.warmupAccount.findMany({
       where: { inbox: { warmupEnabled: true, status: 'active' } },
       include: { inbox: true }
     });
@@ -165,14 +166,14 @@ export class WarmupService {
   }
 
   private async findRandomRecipient(excludeInboxId: string): Promise<any> {
-    const count = await this.prisma.client.warmupAccount.count({
+    const count = await this.prisma.warmupAccount.count({
       where: { inboxId: { not: excludeInboxId } }
     });
 
     if (count === 0) return null;
 
     const skip = Math.floor(Math.random() * count);
-    const recipients = await this.prisma.client.warmupAccount.findMany({
+    const recipients = await this.prisma.warmupAccount.findMany({
       where: { inboxId: { not: excludeInboxId } },
       skip,
       take: 1,

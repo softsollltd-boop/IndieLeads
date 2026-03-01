@@ -34,7 +34,7 @@ export class BouncesService {
     this.logger.warn(`Processing ${event.type} bounce for log: ${event.logId}`);
 
     // 1. Find sending log context
-    const log = await (this.prisma as any).sendingLog.findUnique({
+    const log = await this.prisma.sendingLog.findUnique({
       where: { id: event.logId },
     });
 
@@ -46,7 +46,7 @@ export class BouncesService {
     const { leadId, campaignId, workspaceId, inboxId } = log;
 
     // 2. Persist the bounce to the DB (replaces in-memory Map)
-    await (this.prisma as any).bounceLog.create({
+    await this.prisma.bounceLog.create({
       data: {
         workspaceId,
         campaignId,
@@ -60,7 +60,7 @@ export class BouncesService {
 
     // 3. Update the SendingLog status to reflect the bounce
     const newLogStatus = event.type === 'spam' ? 'spam_complaint' : 'bounced';
-    await (this.prisma as any).sendingLog.update({
+    await this.prisma.sendingLog.update({
       where: { id: event.logId },
       data: { status: newLogStatus },
     });
@@ -95,7 +95,7 @@ export class BouncesService {
    */
   private async evaluateBounceThreshold(workspaceId: string, campaignId: string) {
     // Count of total sent emails for this campaign (rolling last 100)
-    const recentLogs = await (this.prisma as any).sendingLog.findMany({
+    const recentLogs = await this.prisma.sendingLog.findMany({
       where: { campaignId, status: { not: 'pending' } },
       orderBy: { createdAt: 'desc' },
       take: 100,
@@ -167,7 +167,7 @@ export class BouncesService {
    * Returns bounce history for a workspace (for the analytics/bounces UI).
    */
   async getBounceHistory(workspaceId: string, limit = 50) {
-    return (this.prisma as any).bounceLog.findMany({
+    return this.prisma.bounceLog.findMany({
       where: { workspaceId },
       orderBy: { createdAt: 'desc' },
       take: limit,
@@ -183,16 +183,16 @@ export class BouncesService {
     last30Days.setDate(last30Days.getDate() - 30);
 
     const [hard, soft, spam, totalSent] = await Promise.all([
-      (this.prisma as any).bounceLog.count({
+      this.prisma.bounceLog.count({
         where: { workspaceId, type: 'hard', createdAt: { gte: last30Days } },
       }),
-      (this.prisma as any).bounceLog.count({
+      this.prisma.bounceLog.count({
         where: { workspaceId, type: 'soft', createdAt: { gte: last30Days } },
       }),
-      (this.prisma as any).bounceLog.count({
+      this.prisma.bounceLog.count({
         where: { workspaceId, type: 'spam', createdAt: { gte: last30Days } },
       }),
-      (this.prisma as any).sendingLog.count({
+      this.prisma.sendingLog.count({
         where: {
           workspaceId,
           status: { not: 'pending' },
