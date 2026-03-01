@@ -57,8 +57,8 @@ export class RepliesService {
     const { category } = await this.classifyReply(body);
 
     // 4. Atomic Multi-Operation: Save Log & Update Lead State
-    await this.prisma.$transaction([
-      this.prisma.replyLog.create({
+    await this.prisma.$transaction(async (tx) => {
+      await tx.replyLog.create({
         data: {
           workspaceId,
           leadId: lead.id,
@@ -69,16 +69,17 @@ export class RepliesService {
           body,
           classification: category,
           receivedAt: new Date(receivedAt || Date.now()),
+          sendingLogId: logId || null,
         }
-      }),
-      this.prisma.lead.update({
+      });
+      await tx.lead.update({
         where: { id: lead.id },
         data: {
           status: category === 'unsubscribe' ? LeadStatus.UNSUBSCRIBED : LeadStatus.REPLIED,
           lastEventAt: new Date()
         }
-      })
-    ]);
+      });
+    });
 
     this.logger.log(`[REPLY] Categorized ${category} from ${lead.email}`);
   }

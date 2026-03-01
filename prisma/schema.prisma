@@ -210,6 +210,7 @@ model SendingLog {
   inbox        Inbox     @relation(fields: [inboxId], references: [id])
   lead         Lead      @relation(fields: [leadId], references: [id])
   bounceLogs   BounceLog[]
+  replyLogs    ReplyLog[]
   @@index([workspaceId, sentAt])
   @@index([campaignId])
   @@index([inboxId])
@@ -247,10 +248,12 @@ model ReplyLog {
   classification String?
   receivedAt     DateTime  @default(now())
   messageId      String?   @unique
+  sendingLogId   String?
   workspace      Workspace @relation(fields: [workspaceId], references: [id])
   campaign       Campaign  @relation(fields: [campaignId], references: [id])
   inbox          Inbox     @relation(fields: [inboxId], references: [id])
   lead           Lead      @relation(fields: [leadId], references: [id])
+  sendingLog     SendingLog? @relation(fields: [sendingLogId], references: [id])
   @@index([workspaceId, receivedAt])
   @@index([campaignId])
   @@index([inboxId])
