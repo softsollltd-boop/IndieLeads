@@ -44,14 +44,26 @@ const AddInboxModal: React.FC<{ isOpen: boolean; onClose: () => void; onCreated:
   const handleProviderSelect = (key: keyof typeof PROVIDER_CONFIGS) => {
     const config = PROVIDER_CONFIGS[key];
     setProvider(key);
-    setFormData({
-      ...formData,
+    setFormData(prev => ({
+      ...prev,
       smtpHost: config.smtpHost,
       smtpPort: config.smtpPort,
       imapHost: config.imapHost,
       imapPort: config.imapPort
-    });
+    }));
     setStep(2);
+  };
+
+  const resetForm = () => {
+    setStep(1);
+    setProvider(null);
+    setFormData({ email: '', password: '', fromName: '', smtpHost: '', smtpPort: 465, imapHost: '', imapPort: 993 });
+    setError('');
+  };
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -76,7 +88,7 @@ const AddInboxModal: React.FC<{ isOpen: boolean; onClose: () => void; onCreated:
         }
       });
       onCreated();
-      onClose();
+      handleClose();
     } catch (err: any) {
       setError(err.response?.data?.message || 'Connection handshake failed.');
     } finally {
@@ -87,18 +99,18 @@ const AddInboxModal: React.FC<{ isOpen: boolean; onClose: () => void; onCreated:
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md overflow-y-auto">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="w-full max-w-xl rounded-3xl overflow-hidden shadow-2xl bg-white border border-slate-100"
+        className="w-full max-w-xl rounded-3xl shadow-2xl bg-white border border-slate-100 my-auto"
       >
         <div className="px-8 py-6 flex items-center justify-between border-b border-slate-50">
           <div>
             <h2 className="text-xl font-bold text-slate-900">Connect Email Account</h2>
             <p className="text-sm text-slate-500 mt-1">Add your professional mailbox to IndieLeads.</p>
           </div>
-          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-900 transition-colors bg-slate-50 rounded-xl">
+          <button onClick={handleClose} className="p-2 text-slate-400 hover:text-slate-900 transition-colors bg-slate-50 rounded-xl">
             <X size={20} />
           </button>
         </div>
@@ -162,9 +174,12 @@ const AddInboxModal: React.FC<{ isOpen: boolean; onClose: () => void; onCreated:
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700 ml-1">App Password</label>
+                <label className="text-sm font-semibold text-slate-700 ml-1">
+                  {provider === 'smtp' ? 'SMTP Password' : 'App Password'}
+                </label>
                 <input
-                  type="password" required placeholder="•••• •••• •••• ••••"
+                  type="password" required
+                  placeholder={provider === 'smtp' ? 'Your email password' : '•••• •••• •••• ••••'}
                   className="w-full h-12 px-4 rounded-xl text-sm font-medium border focus:outline-none focus:ring-2 transition-all bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-500 focus:ring-emerald-500/10"
                   value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
