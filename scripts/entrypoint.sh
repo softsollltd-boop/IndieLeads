@@ -25,7 +25,7 @@ ls -F apps/api/dist/main.js || echo "❌ API build missing!"
 ls -F apps/workers/dist/main.js || echo "❌ Worker build missing!"
 
 # Execute the main command (the CMD from Dockerfile or docker-compose)
-if [ -z "$@" ]; then
+if [ $# -eq 0 ]; then
     echo "⚠️ No command provided! Defaulting to start:api"
     exec npm run start:api
 else
