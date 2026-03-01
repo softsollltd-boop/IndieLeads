@@ -6,9 +6,11 @@ import { LeadsModule } from '../leads/leads.module';
 import { CampaignsModule } from '../campaigns/campaigns.module';
 import { InboxesModule } from '../inboxes/inboxes.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { PrismaModule } from '../prisma/prisma.module';
+import { WorkspacesModule } from '../workspaces/workspaces.module';
 
 @Module({
-  imports: [LeadsModule, CampaignsModule, InboxesModule, NotificationsModule],
+  imports: [PrismaModule, WorkspacesModule, LeadsModule, CampaignsModule, InboxesModule, NotificationsModule],
   controllers: [BouncesController],
   providers: [BouncesService],
   exports: [BouncesService],
