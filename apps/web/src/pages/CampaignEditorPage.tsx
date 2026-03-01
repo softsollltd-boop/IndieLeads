@@ -21,9 +21,10 @@ interface Step {
 
 const FieldMapper: React.FC<{
   headers: string[],
-  onComplete: (mapping: Record<string, string>) => void
-}> = ({ headers, onComplete }) => {
-  const isEthereal = true;
+  onComplete: (mapping: Record<string, string>) => void,
+  theme: 'ethereal' | 'glass'
+}> = ({ headers, onComplete, theme }) => {
+  const isEthereal = theme === 'ethereal';
   const systemFields = [
     { key: 'email', label: 'Email Address (Required)', required: true },
     { key: 'firstName', label: 'First Name', required: false },
@@ -75,8 +76,8 @@ const FieldMapper: React.FC<{
   );
 };
 
-const Stepper: React.FC<{ currentStep: number, onStepClick: (step: number) => void }> = ({ currentStep, onStepClick }) => {
-  const isEthereal = true;
+const Stepper: React.FC<{ currentStep: number, onStepClick: (step: number) => void, theme: 'ethereal' | 'glass' }> = ({ currentStep, onStepClick, theme }) => {
+  const isEthereal = theme === 'ethereal';
   const steps = [
     { n: 1, label: 'Import Leads', icon: Users },
     { n: 2, label: 'Sequence', icon: Layout },
@@ -126,10 +127,10 @@ const TZ_SUGGESTIONS: Record<string, string> = {
   'Paris': 'Europe/Paris',
 };
 
-const CampaignEditorPage: React.FC = () => {
+const CampaignEditorPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }) => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const isEthereal = true;
+  const isEthereal = theme === 'ethereal';
 
   const [currentStep, setCurrentStep] = useState(1);
   const [campaignName, setCampaignName] = useState(() => {
@@ -426,7 +427,7 @@ const CampaignEditorPage: React.FC = () => {
         </div>
       </div>
 
-      <Stepper currentStep={currentStep} onStepClick={setCurrentStep} />
+      <Stepper currentStep={currentStep} onStepClick={setCurrentStep} theme={theme} />
 
       <div className="max-w-5xl mx-auto">
         <AnimatePresence mode="wait">
@@ -462,7 +463,7 @@ const CampaignEditorPage: React.FC = () => {
                         </div>
                       ) : (
                         <div className="text-left bg-white p-8 rounded-xl border border-slate-200 shadow-sm">
-                          <FieldMapper headers={csvHeaders} onComplete={handleImportComplete} />
+                          <FieldMapper headers={csvHeaders} onComplete={handleImportComplete} theme={theme} />
                         </div>
                       )}
 

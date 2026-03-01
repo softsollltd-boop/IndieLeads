@@ -7,8 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import apiClient from '../utils/api-client';
 
-const DeliverabilityLabPage: React.FC = () => {
-  const isEthereal = true;
+const DeliverabilityLabPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }) => {
+  const isEthereal = theme === 'ethereal';
   const primaryColor = '#10b981';
 
   const [history, setHistory] = useState<any[]>([]);

@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Search, Filter, History, ShieldCheck, ArrowRight, Activity, Database } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const AuditLogsPage: React.FC = () => {
-  const isEthereal = true;
+const AuditLogsPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }) => {
+  const isEthereal = theme === 'ethereal';
 
   const mockLogs = [
     { id: 'a1', user: 'Alex Reed', action: 'Paused Campaign', entity: 'Enterprise Series', time: '12m ago', type: 'campaign' },

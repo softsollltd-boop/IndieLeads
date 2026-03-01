@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Bell, ShieldAlert, AlertCircle, Trash2, CheckCircle2, Zap, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const NotificationsPage: React.FC = () => {
-  const isEthereal = true;
+const NotificationsPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }) => {
+  const isEthereal = theme === 'ethereal';
 
   const [notifications, setNotifications] = useState([
     { id: '1', title: 'Critical: Bounce Spike Detected', message: 'Campaign "Q4 Enterprise Outreach" exceeded 8% bounce threshold. Autopause protocol active.', type: 'critical', time: '12m ago', isRead: false },

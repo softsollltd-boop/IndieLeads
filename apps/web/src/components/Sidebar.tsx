@@ -19,9 +19,10 @@ import {
 interface SidebarProps {
   workspace: { id: string; name: string };
   onClose: () => void;
+  theme: 'ethereal' | 'glass';
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ workspace, onClose }) => {
+const Sidebar: React.FC<SidebarProps> = ({ workspace, onClose, theme }) => {
   const location = useLocation();
 
   const sidebarItems = [

@@ -33,8 +33,8 @@ const statusColor = (status: string) => {
   return 'bg-slate-50 text-slate-500 border-slate-100';
 };
 
-const AnalyticsPage: React.FC = () => {
-  const isEthereal = true;
+const AnalyticsPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }) => {
+  const isEthereal = theme === 'ethereal';
   const primaryColor = '#10b981';
 
   const [pulse, setPulse] = useState<PulseDay[]>([]);

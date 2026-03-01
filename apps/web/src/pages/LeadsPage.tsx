@@ -6,9 +6,10 @@ import Skeleton from '../components/Skeleton';
 
 const FieldMapper: React.FC<{
   headers: string[],
-  onComplete: (mapping: Record<string, string>) => void
-}> = ({ headers, onComplete }) => {
-  const isEthereal = true;
+  onComplete: (mapping: Record<string, string>) => void,
+  theme: 'ethereal' | 'glass'
+}> = ({ headers, onComplete, theme }) => {
+  const isEthereal = theme === 'ethereal';
   const systemFields = [
     { key: 'email', label: 'Email Address (Required)', required: true },
     { key: 'firstName', label: 'First Name', required: false },
@@ -60,10 +61,10 @@ const FieldMapper: React.FC<{
   );
 };
 
-const LeadDetailsSidebar: React.FC<{ lead: any, onClose: () => void }> = ({ lead, onClose }) => {
+const LeadDetailsSidebar: React.FC<{ lead: any, onClose: () => void, theme: 'ethereal' | 'glass' }> = ({ lead, onClose, theme }) => {
   const [timeline, setTimeline] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const isEthereal = true;
+  const isEthereal = theme === 'ethereal';
 
   useEffect(() => {
     const fetchTimeline = async () => {
@@ -156,8 +157,8 @@ const LeadDetailsSidebar: React.FC<{ lead: any, onClose: () => void }> = ({ lead
   );
 };
 
-const LeadsPage: React.FC = () => {
-  const isEthereal = true;
+const LeadsPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }) => {
+  const isEthereal = theme === 'ethereal';
   const [leads, setLeads] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -473,7 +474,7 @@ const LeadsPage: React.FC = () => {
                     <input type="file" className="hidden" accept=".csv" onChange={handleFileUpload} />
                   </label>
                 ) : (
-                  <FieldMapper headers={csvHeaders} onComplete={handleImportComplete} />
+                  <FieldMapper headers={csvHeaders} onComplete={handleImportComplete} theme={theme} />
                 )}
               </div>
             </motion.div>
@@ -483,7 +484,7 @@ const LeadsPage: React.FC = () => {
         {activeLead && (
           <>
             <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[105]" onClick={() => setActiveLead(null)} />
-            <LeadDetailsSidebar lead={activeLead} onClose={() => setActiveLead(null)} />
+            <LeadDetailsSidebar lead={activeLead} onClose={() => setActiveLead(null)} theme={theme} />
           </>
         )}
       </AnimatePresence>

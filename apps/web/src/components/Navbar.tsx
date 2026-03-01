@@ -6,9 +6,11 @@ interface NavbarProps {
   workspace: { id: string; name: string };
   onWorkspaceChange: (w: { id: string; name: string }) => void;
   onToggleSidebar: () => void;
+  theme: 'ethereal' | 'glass';
+  onToggleTheme: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ workspace, onToggleSidebar }) => {
+const Navbar: React.FC<NavbarProps> = ({ workspace, onToggleSidebar, theme, onToggleTheme }) => {
 
   return (
     <header className="h-20 flex items-center justify-between px-4 md:px-8 z-30 sticky top-0 w-full">

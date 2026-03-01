@@ -42,11 +42,14 @@ const AppContent: React.FC = () => {
   const [currentWorkspace, setCurrentWorkspace] = useState({ id: 'w1', name: 'Indie Launch' });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showGhostMode, setShowGhostMode] = useState(true);
+  const [theme, setTheme] = useState<'ethereal' | 'glass'>('ethereal');
   const location = useLocation();
 
   useEffect(() => {
-    document.body.className = 'theme-ethereal';
-  }, []);
+    document.body.className = `theme-${theme}`;
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(prev => prev === 'ethereal' ? 'glass' : 'ethereal');
 
   const handleLogin = () => setIsAuthenticated(true);
 
@@ -84,7 +87,11 @@ const AppContent: React.FC = () => {
             />
           )}
           <div className={`fixed inset-y-0 left-0 z-50 lg:static lg:block transition-transform duration-500 ease-out transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-            <Sidebar workspace={currentWorkspace} onClose={() => setIsSidebarOpen(false)} />
+            <Sidebar
+              theme={theme}
+              workspace={currentWorkspace}
+              onClose={() => setIsSidebarOpen(false)}
+            />
           </div>
         </>
       )}
@@ -92,6 +99,8 @@ const AppContent: React.FC = () => {
       <div className="flex flex-col flex-1 overflow-hidden w-full relative">
         {isAuthenticated && (
           <Navbar
+            theme={theme}
+            onToggleTheme={toggleTheme}
             workspace={currentWorkspace}
             onWorkspaceChange={setCurrentWorkspace}
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -116,18 +125,18 @@ const AppContent: React.FC = () => {
                 <Route path="*" element={<Navigate to="/login" replace />} />
               ) : (
                 <>
-                  <Route path="/dashboard" element={<PageTransition><DashboardPage /></PageTransition>} />
-                  <Route path="/campaigns" element={<PageTransition><CampaignsPage /></PageTransition>} />
-                  <Route path="/campaigns/:id" element={<PageTransition><CampaignEditorPage /></PageTransition>} />
-                  <Route path="/leads" element={<PageTransition><LeadsPage /></PageTransition>} />
-                  <Route path="/replies" element={<PageTransition><RepliesPage theme="ethereal" /></PageTransition>} />
-                  <Route path="/inboxes" element={<PageTransition><InboxesPage /></PageTransition>} />
-                  <Route path="/warmup" element={<PageTransition><WarmupPage /></PageTransition>} />
-                  <Route path="/lab" element={<PageTransition><DeliverabilityLabPage /></PageTransition>} />
-                  <Route path="/analytics" element={<PageTransition><AnalyticsPage /></PageTransition>} />
-                  <Route path="/notifications" element={<PageTransition><NotificationsPage /></PageTransition>} />
-                  <Route path="/audit-logs" element={<PageTransition><AuditLogsPage /></PageTransition>} />
-                  <Route path="/settings" element={<PageTransition><SettingsPage /></PageTransition>} />
+                  <Route path="/dashboard" element={<PageTransition><DashboardPage theme={theme} /></PageTransition>} />
+                  <Route path="/campaigns" element={<PageTransition><CampaignsPage theme={theme} /></PageTransition>} />
+                  <Route path="/campaigns/:id" element={<PageTransition><CampaignEditorPage theme={theme} /></PageTransition>} />
+                  <Route path="/leads" element={<PageTransition><LeadsPage theme={theme} /></PageTransition>} />
+                  <Route path="/replies" element={<PageTransition><RepliesPage theme={theme} /></PageTransition>} />
+                  <Route path="/inboxes" element={<PageTransition><InboxesPage theme={theme} /></PageTransition>} />
+                  <Route path="/warmup" element={<PageTransition><WarmupPage theme={theme} /></PageTransition>} />
+                  <Route path="/lab" element={<PageTransition><DeliverabilityLabPage theme={theme} /></PageTransition>} />
+                  <Route path="/analytics" element={<PageTransition><AnalyticsPage theme={theme} /></PageTransition>} />
+                  <Route path="/notifications" element={<PageTransition><NotificationsPage theme={theme} /></PageTransition>} />
+                  <Route path="/audit-logs" element={<PageTransition><AuditLogsPage theme={theme} /></PageTransition>} />
+                  <Route path="/settings" element={<PageTransition><SettingsPage theme={theme} /></PageTransition>} />
                   <Route path="/support" element={<PageTransition><SupportPage /></PageTransition>} />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </>

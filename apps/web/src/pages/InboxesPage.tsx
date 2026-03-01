@@ -33,8 +33,8 @@ const PROVIDER_CONFIGS = {
   }
 };
 
-const AddInboxModal: React.FC<{ isOpen: boolean; onClose: () => void; onCreated: () => void }> = ({ isOpen, onClose, onCreated }) => {
-  const isEthereal = true;
+const AddInboxModal: React.FC<{ isOpen: boolean; onClose: () => void; onCreated: () => void; theme: 'ethereal' | 'glass' }> = ({ isOpen, onClose, onCreated, theme }) => {
+  const isEthereal = theme === 'ethereal';
   const [step, setStep] = useState(1);
   const [provider, setProvider] = useState<keyof typeof PROVIDER_CONFIGS | null>(null);
   const [formData, setFormData] = useState({ email: '', password: '', fromName: '', smtpHost: '', smtpPort: 465, imapHost: '', imapPort: 993 });
@@ -232,8 +232,8 @@ const AddInboxModal: React.FC<{ isOpen: boolean; onClose: () => void; onCreated:
   );
 };
 
-const InboxesPage: React.FC = () => {
-  const isEthereal = true;
+const InboxesPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }) => {
+  const isEthereal = theme === 'ethereal';
   const [inboxes, setInboxes] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -577,6 +577,7 @@ const InboxesPage: React.FC = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onCreated={fetchInboxes}
+        theme={theme}
       />
 
       <BulkUpdateModal
@@ -587,6 +588,7 @@ const InboxesPage: React.FC = () => {
           fetchInboxes();
           setSelectedInboxes([]);
         }}
+        theme={theme}
       />
     </div>
   );

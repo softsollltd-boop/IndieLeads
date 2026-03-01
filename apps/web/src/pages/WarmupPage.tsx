@@ -26,8 +26,8 @@ interface WarmupAccount {
   };
 }
 
-const WarmupPage: React.FC = () => {
-  const isEthereal = true;
+const WarmupPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }) => {
+  const isEthereal = theme === 'ethereal';
   const primaryColor = '#10b981';
 
   const [accounts, setAccounts] = useState<WarmupAccount[]>([]);

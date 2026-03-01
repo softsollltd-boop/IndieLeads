@@ -37,7 +37,8 @@ const StatCard: React.FC<{
   );
 };
 
-const DashboardPage: React.FC = () => {
+const DashboardPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }) => {
+  const isEthereal = theme === 'ethereal';
   const navigate = useNavigate();
   const primaryColor = '#10b981';
   const [stats, setStats] = useState({ leads: '0', inboxes: '0', campaigns: '0' });
@@ -215,7 +216,5 @@ const DashboardPage: React.FC = () => {
     </div>
   );
 };
-
-export default DashboardPage;
 
 export default DashboardPage;

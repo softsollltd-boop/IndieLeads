@@ -5,9 +5,9 @@ import apiClient from '../utils/api-client';
 import Skeleton from '../components/Skeleton';
 import Pagination from '../components/Pagination';
 
-const CampaignsPage: React.FC = () => {
+const CampaignsPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }) => {
   const navigate = useNavigate();
-  const isEthereal = true;
+  const isEthereal = theme === 'ethereal';
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'paused' | 'draft'>('all');

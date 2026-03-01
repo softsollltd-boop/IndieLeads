@@ -6,8 +6,8 @@ import TeamSettingsPage from './settings/TeamSettingsPage';
 import TrackingDomainPage from './settings/TrackingDomainPage';
 import apiClient from '../utils/api-client';
 
-const SettingsPage: React.FC = () => {
-  const isEthereal = true;
+const SettingsPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }) => {
+  const isEthereal = theme === 'ethereal';
   const [activeMenu, setActiveMenu] = useState('Profile');
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
