@@ -98,7 +98,9 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   get auditLog() { return this.client.auditLog; }
   get notification() { return this.client.notification; }
   get deliverabilityTest() { return this.client.deliverabilityTest; }
-  get $queryRaw() { return this.client.$queryRaw; }
+
+  // Use raw client for raw queries to avoid extension binding bugs
+  get $queryRaw() { return this._rawClient.$queryRaw.bind(this._rawClient); }
 
   /**
    * Lifecycle hook for database connection with exponential backoff retry.
