@@ -7,7 +7,7 @@ const NotificationsPage: React.FC = () => {
 
   const [notifications, setNotifications] = useState([
     { id: '1', title: 'Critical: Bounce Spike Detected', message: 'Campaign "Q4 Enterprise Outreach" exceeded 8% bounce threshold. Autopause protocol active.', type: 'critical', time: '12m ago', isRead: false },
-    { id: '2', title: 'Node Disconnected', message: 'Credentials for sales@skyreach.ai have expired. Please refresh OAuth tokens.', type: 'warning', time: '2h ago', isRead: false },
+    { id: '2', title: 'Node Disconnected', message: 'Credentials for sales@indieleads.ai have expired. Please refresh OAuth tokens.', type: 'warning', time: '2h ago', isRead: false },
     { id: '3', title: 'Spam Complaint Flagged', message: 'ISP feedback loop detected a spam complaint in the Startup Growth sequence.', type: 'critical', time: '4h ago', isRead: true }
   ]);
 

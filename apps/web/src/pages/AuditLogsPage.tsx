@@ -8,7 +8,7 @@ const AuditLogsPage: React.FC = () => {
   const mockLogs = [
     { id: 'a1', user: 'Alex Reed', action: 'Paused Campaign', entity: 'Enterprise Series', time: '12m ago', type: 'campaign' },
     { id: 'a2', user: 'Jordan Smith', action: 'Updated Sequence', entity: 'SaaS Growth', time: '1h ago', type: 'sequence' },
-    { id: 'a3', user: 'System', action: 'Triggered Shield', entity: 'sales@skyreach.io', time: '4h ago', type: 'security' }
+    { id: 'a3', user: 'System', action: 'Triggered Shield', entity: 'sales@indieleads.ai', time: '4h ago', type: 'security' }
   ];
 
   return (

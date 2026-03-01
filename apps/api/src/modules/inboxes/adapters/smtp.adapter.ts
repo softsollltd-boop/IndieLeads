@@ -53,13 +53,13 @@ export class SmtpAdapter implements EmailProviderAdapter {
 
     try {
       const info = await transporter.sendMail({
-        from: `"${payload.fromName || 'SkyReach User'}" <${credentials.smtpUser}>`,
+        from: `"${payload.fromName || 'IndieLeads User'}" <${credentials.smtpUser}>`,
         to: payload.to,
         subject: payload.subject,
         html: payload.body,
         headers: {
-          'X-SkyReach-Log-ID': payload.logId, // CRITICAL: This is used for reply tracking
-          'Message-ID': `<${payload.logId || Math.random().toString(36).substring(7)}@skyreach.ai>`,
+          'X-IndieLeads-Log-ID': payload.logId, // CRITICAL: This is used for reply tracking
+          'Message-ID': `<${payload.logId || Math.random().toString(36).substring(7)}@indieleads.ai>`,
           'List-Unsubscribe': `<${process.env.FRONTEND_URL}/#/unsub/${payload.leadId}>`,
           ...(payload.inReplyTo ? { 'In-Reply-To': payload.inReplyTo } : {}),
           ...(payload.references ? { 'References': payload.references } : {}),
@@ -122,17 +122,17 @@ export class SmtpAdapter implements EmailProviderAdapter {
         const fullMessage = item.parts.map(p => p.body).join('\n');
         const parsed = await simpleParser(fullMessage);
 
-        const skyreachLogId = parsed.headers.get('x-skyreach-log-id') ||
-          parsed.headers.get('references')?.toString().match(/<([^@]+)@skyreach\.ai>/)?.[1];
+        const indieleadsLogId = parsed.headers.get('x-indieleads-log-id') ||
+          parsed.headers.get('references')?.toString().match(/<([^@]+)@indieleads\.ai>/)?.[1];
 
-        if (skyreachLogId) {
+        if (indieleadsLogId) {
           replies.push({
             messageId: parsed.messageId || idHeader?.[0] || id.toString(),
             from: parsed.from?.value[0]?.address,
             subject: parsed.subject,
             body: parsed.text || parsed.html,
             headers: {
-              'x-skyreach-log-id': skyreachLogId
+              'x-indieleads-log-id': indieleadsLogId
             },
             receivedAt: parsed.date || item.attributes.date
           });

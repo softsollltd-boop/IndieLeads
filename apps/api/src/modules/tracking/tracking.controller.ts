@@ -28,7 +28,7 @@ export class TrackingController {
       '127.0.0.1',
       '.railway.app',
       '.render.com',
-      '.skyreach.ai'
+      '.indieleads.ai'
     ];
 
     if (allowedInternal.some(domain => domain && host.includes(domain))) {
@@ -94,7 +94,7 @@ export class TrackingController {
       return (res as any).redirect(HttpStatus.FOUND, decodedUrl);
     } catch (err) {
       // Fallback: if decoding fails, send them to home
-      return (res as any).redirect('https://skyreach.ai');
+      return (res as any).redirect('https://indieleads.ai');
     }
   }
 }

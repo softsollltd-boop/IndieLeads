@@ -19,7 +19,7 @@ const SettingsPage: React.FC = () => {
     lastName: '',
     password: '',
     companyName: 'Alpha Growth',
-    websiteUrl: 'skyreach.ai'
+    websiteUrl: 'indieleads.ai'
   });
 
   useEffect(() => {
@@ -73,9 +73,9 @@ const SettingsPage: React.FC = () => {
   ];
 
   const plans = [
-    { name: 'Seed', price: '$49', features: ['1 SDR Seat', '2 Active Inboxes', '500 Contacts/mo'], current: false },
-    { name: 'Growth', price: '$149', features: ['5 SDR Seats', '20 Active Inboxes', 'Unlimited Contacts'], current: true, popular: true },
-    { name: 'Enterprise', price: '$499', features: ['Unlimited Seats', 'Dedicated Warmup', 'White-labeled Links'], current: false },
+    { name: 'Launch', price: '$49', features: ['3 Active Inboxes', '2,000 Contacts', 'Unlimited Warmup'], current: false },
+    { name: 'Grow', price: '$99', features: ['25 Active Inboxes', '15,000 Contacts', 'AI Content Analysis'], current: true, popular: true },
+    { name: 'Pro', price: '$199', features: ['100 Active Inboxes', '100,000 Contacts', 'White-labeled Tracking'], current: false },
   ];
 
   return (
@@ -118,7 +118,7 @@ const SettingsPage: React.FC = () => {
                   <div className="flex items-center justify-between relative z-10">
                     <div>
                       <span className="px-2.5 py-1 rounded bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-widest border border-emerald-100">Active Plan</span>
-                      <h2 className="text-2xl font-bold font-heading mt-3 text-slate-900">Growth Plan</h2>
+                      <h2 className="text-2xl font-bold font-heading mt-3 text-slate-900">Grow Plan</h2>
                     </div>
                     <div className="text-right">
                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Next billing cycle</p>

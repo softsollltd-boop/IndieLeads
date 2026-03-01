@@ -44,7 +44,7 @@ const TrackingDomainPage: React.FC = () => {
                         </div>
                         <p className="text-xs text-slate-500 flex gap-2 items-center">
                             <Server size={12} />
-                            Create a <strong>CNAME</strong> record pointing to <code>api.skyreach.ai</code>
+                            Create a <strong>CNAME</strong> record pointing to <code>api.indieleads.ai</code>
                         </p>
                     </div>
 
@@ -89,7 +89,7 @@ const TrackingDomainPage: React.FC = () => {
                     Why use a custom tracking domain?
                 </h4>
                 <p className="text-xs opacity-70 leading-relaxed mb-4">
-                    By default, all SkyReach users share a generic tracking domain. If another user sends spam, it could potentially hurt the reputation of the shared domain.
+                    By default, all IndieLeads users share a generic tracking domain. If another user sends spam, it could potentially hurt the reputation of the shared domain.
                     Using your own subdomain (e.g., <code>link.yourdomain.com</code>) isolates your reputation and improves Google/Outlook deliverability significantly.
                 </p>
             </div>

@@ -1,11 +1,11 @@
-# SkyReach Enterprise 🚀
+# IndieLeads Enterprise 🚀
 
 [![Powered by NestJS](https://img.shields.io/badge/backend-NestJS-E0234E?style=for-the-badge&logo=nestjs)](https://nestjs.com/)
 [![Powered by React](https://img.shields.io/badge/frontend-React-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)
 [![Database: Prisma](https://img.shields.io/badge/ORM-Prisma-2D3748?style=for-the-badge&logo=prisma)](https://www.prisma.io/)
 [![Queue: BullMQ](https://img.shields.io/badge/Queue-BullMQ-FF4500?style=for-the-badge&logo=redis)](https://bullmq.io/)
 
-**SkyReach Enterprise** is a world-class, high-scale cold email automation and deliverability platform. Designed for high-volume outreach with enterprise-grade multi-tenancy, deliverability monitoring, and automated warmup.
+**IndieLeads Enterprise** is a world-class, high-scale cold email automation and deliverability platform. Designed for high-volume outreach with enterprise-grade multi-tenancy, deliverability monitoring, and automated warmup.
 
 ---
 
@@ -41,8 +41,8 @@ The platform is built as a **Turborepo Monorepo**, ensuring high modularity and 
 ### Installation
 1.  **Clone the repository**
     ```bash
-    git clone https://github.com/your-org/skyreach.git
-    cd skyreach
+    git clone https://github.com/your-org/indieleads.git
+    cd indieleads
     ```
 
 2.  **Install dependencies**
@@ -69,7 +69,7 @@ The platform is built as a **Turborepo Monorepo**, ensuring high modularity and 
 
 ## 🔒 Security & Multi-Tenancy
 
-SkyReach implements **Automatic Workspace Isolation**. Every database query is automatically intercepted at the Prisma level to inject `workspaceId` filters, preventing any cross-tenant data leakage—a "Meta-level" engineering pattern for SaaS products.
+IndieLeads implements **Automatic Workspace Isolation**. Every database query is automatically intercepted at the Prisma level to inject `workspaceId` filters, preventing any cross-tenant data leakage—a "Meta-level" engineering pattern for SaaS products.
 
 ## 📈 Scalability
 
@@ -79,4 +79,4 @@ SkyReach implements **Automatic Workspace Isolation**. Every database query is a
 
 ---
 
-Developed with ❤️ by the SkyReach Engineering Team.
+Developed with ❤️ by the IndieLeads Engineering Team.

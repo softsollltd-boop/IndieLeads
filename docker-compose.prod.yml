@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-# SkyReach Enterprise - Production Deployment (VPS / Self-Hosted)
+# IndieLeads Enterprise - Production Deployment (VPS / Self-Hosted)
 # -----------------------------------------------------------------------------
 # This file is used for deploying the stack on a VPS using Docker.
 # It separate the API and Workers into distinct services for independent scaling.

@@ -9,7 +9,7 @@ const SignupPage: React.FC = () => {
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -68,7 +68,7 @@ const SignupPage: React.FC = () => {
         <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-sky-400/10 blur-[150px] rounded-full"></div>
       </div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-[480px] glass-surface rounded-[3rem] p-12 shadow-2xl relative z-10"
@@ -99,8 +99,8 @@ const SignupPage: React.FC = () => {
                   <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 ml-1">Terminal Email</label>
                   <div className="relative">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input 
-                      type="email" required placeholder="commander@enterprise.io"
+                    <input
+                      type="email" required placeholder="solo@indieleads.io"
                       className="w-full h-14 pl-12 pr-4 rounded-2xl text-sm font-bold bg-white/60 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-[#10b981]/10 transition-all"
                       value={email} onChange={e => setEmail(e.target.value)}
                     />
@@ -110,7 +110,7 @@ const SignupPage: React.FC = () => {
                   <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 ml-1">Secure Passkey</label>
                   <div className="relative">
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input 
+                    <input
                       type="password" required minLength={8} placeholder="••••••••••••"
                       className="w-full h-14 pl-12 pr-4 rounded-2xl text-sm font-bold bg-white/60 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-[#10b981]/10 transition-all"
                       value={password} onChange={e => setPassword(e.target.value)}
@@ -125,7 +125,7 @@ const SignupPage: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 ml-1">First Name</label>
-                    <input 
+                    <input
                       required placeholder="Alex"
                       className="w-full h-14 px-6 rounded-2xl text-sm font-bold bg-white/60 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-[#10b981]/10 transition-all"
                       value={firstName} onChange={e => setFirstName(e.target.value)}
@@ -133,7 +133,7 @@ const SignupPage: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 ml-1">Last Name</label>
-                    <input 
+                    <input
                       required placeholder="Reed"
                       className="w-full h-14 px-6 rounded-2xl text-sm font-bold bg-white/60 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-[#10b981]/10 transition-all"
                       value={lastName} onChange={e => setLastName(e.target.value)}
@@ -149,7 +149,7 @@ const SignupPage: React.FC = () => {
                   <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 ml-1">Workspace Entity</label>
                   <div className="relative">
                     <Building className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input 
+                    <input
                       required placeholder="Alpha Growth"
                       className="w-full h-14 pl-12 pr-4 rounded-2xl text-sm font-bold bg-white/60 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-[#10b981]/10 transition-all"
                       value={workspaceName} onChange={e => setWorkspaceName(e.target.value)}
@@ -161,11 +161,11 @@ const SignupPage: React.FC = () => {
             )}
           </AnimatePresence>
 
-          <button 
+          <button
             type="submit" disabled={isLoading}
             className="w-full btn-primary h-14 rounded-2xl font-black uppercase tracking-widest text-xs transition-all active:scale-95 flex items-center justify-center group mt-10"
           >
-            {isLoading ? <Activity className="w-5 h-5 mr-3 animate-spin" /> : (step === 3 ? 'Authorize Access' : 'Continue')} 
+            {isLoading ? <Activity className="w-5 h-5 mr-3 animate-spin" /> : (step === 3 ? 'Authorize Access' : 'Continue')}
             {!isLoading && <ArrowRight size={18} className="ml-3 group-hover:translate-x-1 transition-transform" />}
           </button>
         </form>
@@ -177,8 +177,8 @@ const SignupPage: React.FC = () => {
         </div>
 
         <div className="mt-8 flex items-center justify-center space-x-3 text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">
-           <ShieldCheck size={14} className="text-[#10b981]" />
-           <span>ISO 27001 Protocol</span>
+          <ShieldCheck size={14} className="text-[#10b981]" />
+          <span>ISO 27001 Protocol</span>
         </div>
       </motion.div>
     </div>

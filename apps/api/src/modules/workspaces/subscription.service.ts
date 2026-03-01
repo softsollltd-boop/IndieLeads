@@ -16,7 +16,7 @@ export class SubscriptionService {
     [PlanTier.ENTERPRISE]: { inboxes: 100, leads: 1000000, sequences: 100 }
   };
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async getWorkspacePlan(workspaceId: string) {
     const workspace = await (this.prisma as any).workspace.findUnique({
@@ -29,7 +29,7 @@ export class SubscriptionService {
   async checkLimit(workspaceId: string, resource: 'inboxes' | 'leads' | 'sequences') {
     const tier = await this.getWorkspacePlan(workspaceId) as PlanTier;
     const limit = this.PLAN_LIMITS[tier][resource];
-    
+
     let currentCount = 0;
     if (resource === 'inboxes') {
       currentCount = await (this.prisma as any).inbox.count({ where: { workspaceId } });
@@ -45,6 +45,6 @@ export class SubscriptionService {
 
   async createCheckoutSession(workspaceId: string, tier: PlanTier) {
     // Integration point for Stripe Checkout
-    return { url: `https://checkout.stripe.com/pay/skyreach_${workspaceId}_${tier}` };
+    return { url: `https://checkout.stripe.com/pay/indieleads_${workspaceId}_${tier}` };
   }
 }

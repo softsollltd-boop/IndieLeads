@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { SecurityService } from '../security/security.service';
+import { PlanEnforcementService } from '../workspaces/plan-enforcement.service';
 import { CreateInboxDto, UpdateInboxSettingsDto, InboxProvider } from './dto/inbox.dto';
 import { SmtpAdapter } from './adapters/smtp.adapter';
 
@@ -12,6 +13,7 @@ export class InboxesService {
     private readonly prisma: PrismaService,
     private readonly security: SecurityService,
     private readonly smtpAdapter: SmtpAdapter,
+    private readonly planEnforcement: PlanEnforcementService,
   ) { }
 
   /**
@@ -19,6 +21,9 @@ export class InboxesService {
    */
   async create(workspaceId: string, dto: CreateInboxDto) {
     this.logger.log(`Initiating account connection for: ${dto.email}`);
+
+    // Plan Enforcement: Check if workspace has reached its inbox limit
+    await this.planEnforcement.checkInboxLimit(workspaceId);
 
     // Pre-validation: Prevent duplicate accounts
     const existing = await this.prisma.inbox.findUnique({

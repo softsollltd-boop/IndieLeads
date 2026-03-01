@@ -32,7 +32,7 @@ export const AdminLayout: React.FC = () => {
             <aside className={`bg-slate-950 border-r border-slate-800 transition-all duration-300 ${isSidebarOpen ? 'w-64' : 'w-20'} flex flex-col`}>
                 <div className="p-6 flex items-center gap-3 border-b border-slate-800">
                     <ShieldAlert className="text-red-500 w-8 h-8" />
-                    {isSidebarOpen && <span className="font-bold text-xl tracking-tight text-white">SKYREACH <span className="text-red-500 text-xs align-top">ADMIN</span></span>}
+                    {isSidebarOpen && <span className="font-bold text-xl tracking-tight text-white">INDIELEADS <span className="text-red-500 text-xs align-top">ADMIN</span></span>}
                 </div>
 
                 <nav className="flex-1 p-4 space-y-2">
@@ -43,8 +43,8 @@ export const AdminLayout: React.FC = () => {
                                 key={item.path}
                                 to={item.path}
                                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive
-                                        ? 'bg-red-500/10 text-red-400 border border-red-500/20'
-                                        : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                                    ? 'bg-red-500/10 text-red-400 border border-red-500/20'
+                                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                                     }`}
                             >
                                 <item.icon size={20} />

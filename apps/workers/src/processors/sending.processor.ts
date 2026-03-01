@@ -79,8 +79,8 @@ export class SendingProcessor implements OnModuleInit {
         : email.body;
 
       // 2. Automated Tracking & Unsubscribe Injection
-      const apiUrl = this.configService.get<string>('API_URL') || 'https://api.skyreach.ai';
-      const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'https://app.skyreach.ai';
+      const apiUrl = this.configService.get<string>('API_URL') || 'https://api.indieleads.ai';
+      const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'https://app.indieleads.ai';
 
       let finalBody = bodyWithSignature;
 
@@ -109,13 +109,13 @@ export class SendingProcessor implements OnModuleInit {
         finalBody += `<br/><br/><div style="font-size: 11px; color: #94a3b8; text-align: center;"><a href="${unsubUrl}" style="color: #94a3b8; text-decoration: underline;">${unsubText}</a></div>`;
       }
 
-      // Execute Sending — inject X-SkyReach-Log-Id for reply correlation
+      // Execute Sending — inject X-IndieLeads-Log-Id for reply correlation
       await this.smtpAdapter.sendEmail(creds, {
         to: email.to,
-        fromName: inbox.fromName || 'SkyReach',
+        fromName: inbox.fromName || 'IndieLeads',
         subject: email.subject,
         body: finalBody,
-        logId,           // Written into X-SkyReach-Log-Id header for IMAP reply matching
+        logId,           // Written into X-IndieLeads-Log-Id header for IMAP reply matching
         leadId,
       });
 

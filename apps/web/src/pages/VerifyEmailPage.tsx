@@ -46,7 +46,7 @@ const VerifyEmailPage: React.FC = () => {
                             </div>
                         </div>
                         <h1 className="text-2xl font-bold text-slate-900">Email Verified!</h1>
-                        <p className="text-slate-500">Your account is now fully secured. You can now access all features of SkyReach.</p>
+                        <p className="text-slate-500">Your account is now fully secured. You can now access all features of IndieLeads.</p>
                         <button
                             onClick={() => navigate('/dashboard')}
                             className="w-full bg-emerald-500 text-white py-4 rounded-xl font-bold hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-200 flex items-center justify-center"

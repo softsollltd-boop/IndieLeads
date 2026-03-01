@@ -25,7 +25,7 @@ const LandingPage: React.FC = () => {
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-emerald-500 flex items-center justify-center">
                             <Rocket className="w-6 h-6 text-white" />
                         </div>
-                        <span className="text-xl font-bold tracking-tight">SkyReach</span>
+                        <span className="text-xl font-bold tracking-tight">IndieLeads</span>
                     </div>
 
                     <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
@@ -72,15 +72,15 @@ const LandingPage: React.FC = () => {
                         </div>
 
                         <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight mb-8 leading-[1.1]">
-                            Enterprise-Grade <br />
+                            Elite Outreach <br />
                             <span className="bg-gradient-to-r from-blue-400 via-emerald-400 to-blue-500 bg-clip-text text-transparent">
-                                Outreach Scaled for You.
+                                Built for Solopreneurs.
                             </span>
                         </h1>
 
                         <p className="max-w-2xl mx-auto text-gray-400 text-lg lg:text-xl mb-12 leading-relaxed">
-                            Automate your cold email outreach with high-throughput sending, AI-driven reply detection,
-                            and enterprise-level deliverability tools. Built for teams that mean business.
+                            Automate your cold email outreach with professional-grade sending, AI-driven reply detection,
+                            and world-class deliverability. The power of a 10-person sales team, in your hands.
                         </p>
 
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -88,7 +88,7 @@ const LandingPage: React.FC = () => {
                                 onClick={() => navigate('/signup')}
                                 className="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-500/25 active:scale-95"
                             >
-                                Start Your First Campaign
+                                Start Your Solo Campaign
                                 <ChevronRight className="w-5 h-5" />
                             </button>
                             <button className="w-full sm:w-auto px-8 py-4 bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold rounded-xl transition-all active:scale-95">
@@ -134,8 +134,8 @@ const LandingPage: React.FC = () => {
             <section id="features" className="py-24 bg-white/[0.02]">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center mb-20">
-                        <h2 className="text-3xl lg:text-4xl font-bold mb-4">Everything you need to deliver.</h2>
-                        <p className="text-gray-400">Precision tools designed for high-performance outreach teams.</p>
+                        <h2 className="text-3xl lg:text-4xl font-bold mb-4">Scale without the overhead.</h2>
+                        <p className="text-gray-400">The same tools used by agencies, simplified for independent founders.</p>
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8">
@@ -143,7 +143,7 @@ const LandingPage: React.FC = () => {
                             {
                                 icon: <Zap className="w-6 h-6 text-yellow-400" />,
                                 title: "High-Throughput",
-                                desc: "Distributed worker architecture built to handle millions of emails per month without missing a beat."
+                                desc: "Scale to 50k+ emails per month effortlessly. Our architecture handles the heavy lifting while you focus on closing."
                             },
                             {
                                 icon: <Shield className="w-6 h-6 text-emerald-400" />,
@@ -205,13 +205,13 @@ const LandingPage: React.FC = () => {
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
                     <div className="flex items-center gap-3">
                         <Rocket className="w-5 h-5 text-gray-400" />
-                        <span className="text-sm font-bold text-gray-400">SkyReach Enterprise © 2026</span>
+                        <span className="text-sm font-bold text-gray-400">IndieLeads © 2026</span>
                     </div>
 
                     <div className="flex items-center gap-8 text-sm text-gray-500 font-medium">
                         <a href="/#/terms" className="hover:text-white transition-colors">Terms</a>
                         <a href="/#/privacy" className="hover:text-white transition-colors">Privacy</a>
-                        <a href="mailto:support@skyreach.io" className="hover:text-white transition-colors">Support</a>
+                        <a href="mailto:support@indieleads.io" className="hover:text-white transition-colors">Support</a>
                         <a href="https://twitter.com" className="hover:text-white transition-colors">Twitter</a>
                     </div>
                 </div>

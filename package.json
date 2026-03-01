@@ -1,5 +1,5 @@
 {
-  "name": "skyreach-enterprise",
+  "name": "indieleads",
   "version": "1.0.0",
   "private": true,
   "workspaces": [
@@ -24,7 +24,7 @@
     "@nestjs/platform-express": "^11.0.0",
     "@nestjs/platform-socket.io": "^11.0.0",
     "@nestjs/websockets": "^11.0.0",
-    "@prisma/client": "6.2.1",
+    "@prisma/client": "^6.2.1",
     "axios": "^1.7.0",
     "bcryptjs": "^3.0.3",
     "bullmq": "^5.0.0",
@@ -49,7 +49,7 @@
     "@types/mailparser": "^3.4.6",
     "@types/node": "^22.0.0",
     "@types/nodemailer": "^6.4.17",
-    "prisma": "6.2.1",
+    "prisma": "^6.2.1",
     "source-map-support": "^0.5.21",
     "ts-loader": "^9.5.0",
     "tsconfig-paths": "^4.2.0",

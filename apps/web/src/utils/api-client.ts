@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 /**
- * SkyReach Enterprise API Client
+ * IndieLeads API Client
  * Logic hardened for production with unified response handling.
  */
 const getBaseURL = () => {

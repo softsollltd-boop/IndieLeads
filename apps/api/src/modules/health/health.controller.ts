@@ -14,7 +14,7 @@ export class HealthController {
   async check() {
     try {
       // 1. Database Pulse
-      await (this.prisma as any).client.$queryRaw`SELECT 1`;
+      await this.prisma.$queryRaw`SELECT 1`;
 
       // 2. Redis/Queue Pulse
       const queueStats = await this.queuesService.getQueueStatus();

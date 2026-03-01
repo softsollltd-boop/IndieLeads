@@ -7,9 +7,24 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { json, urlencoded } from 'express';
 
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import * as Sentry from "@sentry/nestjs";
+import { nodeProfilingIntegration } from "@sentry/profiling-node";
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
+
+  const sentryDsn = process.env.SENTRY_DSN;
+  if (sentryDsn) {
+    Sentry.init({
+      dsn: sentryDsn,
+      integrations: [
+        nodeProfilingIntegration(),
+      ],
+      tracesSampleRate: 1.0,
+      profilesSampleRate: 1.0,
+    });
+    logger.log('Sentry Error Tracking initialized.');
+  }
 
   // Use default options
   const app = await NestFactory.create(AppModule);
@@ -63,7 +78,7 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
   await app.listen(port, '0.0.0.0');
 
-  logger.log(`SkyReach API is running on port: ${port}`);
+  logger.log(`IndieLeads API is running on port: ${port}`);
 }
 
 bootstrap();

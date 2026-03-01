@@ -14,7 +14,7 @@ export const SupportPage: React.FC = () => {
         <div className="max-w-4xl mx-auto space-y-8">
             <div>
                 <h1 className="text-3xl font-bold text-white mb-2">Help & Support</h1>
-                <p className="text-slate-400">We are here to help you get the best out of SkyReach.</p>
+                <p className="text-slate-400">We are here to help you get the best out of IndieLeads.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

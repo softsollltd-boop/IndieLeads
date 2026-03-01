@@ -46,8 +46,11 @@ model Workspace {
   sendingLogs   SendingLog[]
   replyLogs     ReplyLog[]
   bounceLogs    BounceLog[]
+  plan          String     @default("grow") // launch, grow, pro
+  subscriptionStatus String  @default("active") // active, trialing, past_due, canceled
   auditLogs     AuditLog[]
   notifications Notification[]
+  deliverabilityTests DeliverabilityTest[]
 }
 
 model Member {
@@ -250,4 +253,21 @@ model Notification {
   createdAt   DateTime  @default(now())
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
   @@index([workspaceId, isRead])
+}
+
+model DeliverabilityTest {
+  id              String    @id @default(uuid())
+  workspaceId     String
+  inboxId         String
+  status          String    @default("completed")
+  score           Int
+  placement       Json      // { gmail: string, outlook: string, ... }
+  dnsHealth       Json      // { spf: boolean, dkim: boolean, dmarc: boolean }
+  recommendations String[]
+  subject         String?
+  body            String?   @db.Text
+  createdAt       DateTime  @default(now())
+  workspace       Workspace @relation(fields: [workspaceId], references: [id])
+  @@index([workspaceId])
+  @@index([inboxId])
 }

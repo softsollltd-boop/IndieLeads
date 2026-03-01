@@ -1,4 +1,4 @@
-app = "skyreach-workers"
+app = "indieleads-workers"
 primary_region = "ord"
 
 [build]

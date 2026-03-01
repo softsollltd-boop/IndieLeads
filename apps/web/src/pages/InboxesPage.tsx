@@ -96,7 +96,7 @@ const AddInboxModal: React.FC<{ isOpen: boolean; onClose: () => void; onCreated:
         <div className="px-8 py-6 flex items-center justify-between border-b border-slate-50">
           <div>
             <h2 className="text-xl font-bold text-slate-900">Connect Email Account</h2>
-            <p className="text-sm text-slate-500 mt-1">Add your professional mailbox to SkyReach.</p>
+            <p className="text-sm text-slate-500 mt-1">Add your professional mailbox to IndieLeads.</p>
           </div>
           <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-900 transition-colors bg-slate-50 rounded-xl">
             <X size={20} />

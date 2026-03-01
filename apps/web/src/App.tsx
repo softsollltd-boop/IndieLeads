@@ -39,7 +39,7 @@ import { Toaster } from 'react-hot-toast';
 
 const AppContent: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
-  const [currentWorkspace, setCurrentWorkspace] = useState({ id: 'w1', name: 'Alpha Growth' });
+  const [currentWorkspace, setCurrentWorkspace] = useState({ id: 'w1', name: 'Indie Launch' });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showGhostMode, setShowGhostMode] = useState(true);
   const location = useLocation();
@@ -120,7 +120,7 @@ const AppContent: React.FC = () => {
                   <Route path="/campaigns" element={<PageTransition><CampaignsPage /></PageTransition>} />
                   <Route path="/campaigns/:id" element={<PageTransition><CampaignEditorPage /></PageTransition>} />
                   <Route path="/leads" element={<PageTransition><LeadsPage /></PageTransition>} />
-                  <Route path="/replies" element={<PageTransition><RepliesPage /></PageTransition>} />
+                  <Route path="/replies" element={<PageTransition><RepliesPage theme="ethereal" /></PageTransition>} />
                   <Route path="/inboxes" element={<PageTransition><InboxesPage /></PageTransition>} />
                   <Route path="/warmup" element={<PageTransition><WarmupPage /></PageTransition>} />
                   <Route path="/lab" element={<PageTransition><DeliverabilityLabPage /></PageTransition>} />

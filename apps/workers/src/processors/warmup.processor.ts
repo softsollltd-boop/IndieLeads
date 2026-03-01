@@ -66,7 +66,7 @@ export class WarmupProcessor implements OnModuleInit {
       // 3. REAL SMTP send via the production adapter
       await this.smtpAdapter.sendEmail(creds, {
         to: recipientInbox.email,
-        fromName: senderInbox.fromName || 'SkyReach Warmup',
+        fromName: senderInbox.fromName || 'IndieLeads Warmup',
         subject,
         body: `<p>${body}</p>`,
         logId: `warmup_${job.id}`,

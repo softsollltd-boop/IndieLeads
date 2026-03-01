@@ -1,9 +1,9 @@
-SKYREACH ENTERPRISE - IN-DEPTH SYSTEM DOCUMENTATION
+INDIELEADS ENTERPRISE - IN-DEPTH SYSTEM DOCUMENTATION
 ===================================================
 
 1. PROJECT OVERVIEW
 -------------------
-SkyReach Enterprise is a high-performance, multi-tenant Cold Email SaaS platform designed for high-volume outreach, deliverability optimization, and automated lead sequencing. It is built using a modern, scalable micro-service architecture that separates the API, the User Interface, and the heavy-lift Background Processors (Workers).
+IndieLeads Enterprise is a high-performance, multi-tenant Cold Email SaaS platform designed for high-volume outreach, deliverability optimization, and automated lead sequencing. It is built using a modern, scalable micro-service architecture that separates the API, the User Interface, and the heavy-lift Background Processors (Workers).
 
 2. TECH STACK (PER MODULE)
 --------------------------

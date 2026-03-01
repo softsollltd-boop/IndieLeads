@@ -10,10 +10,10 @@ echo "🚀 Starting Production Entrypoint..."
 echo "🔄 Generating Prisma Client..."
 npx prisma generate
 
-# Sync database schema
+# Sync database schema (Production-safe migrations)
 if [ "$RUN_MIGRATIONS" = "true" ]; then
-  echo "⏩ Skipping database sync (Disabled for Transaction Pooler compatibility)"
-  # npx prisma db push --schema=./prisma/schema.prisma --accept-data-loss
+  echo "⏩ Running production migrations..."
+  npx prisma migrate deploy
 else
   echo "⏩ Skipping database sync (RUN_MIGRATIONS != true)"
 fi

@@ -1,5 +1,5 @@
 {
-  "name": "@skyreach/web",
+  "name": "@indieleads/web",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@sentry/react": "^10.40.0",
     "axios": "^1.7.0",
     "clsx": "^2.1.1",
     "framer-motion": "^11.0.8",

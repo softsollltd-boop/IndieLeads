@@ -11,10 +11,10 @@ async function main() {
 
   // Create Test User
   const user = await (prisma as any).user.upsert({
-    where: { email: 'alex@skyreach.ai' },
+    where: { email: 'alex@indieleads.ai' },
     update: {},
     create: {
-      email: 'alex@skyreach.ai',
+      email: 'alex@indieleads.ai',
       passwordHash: 'argon2_hashed_password',
       firstName: 'Alex',
       lastName: 'Reed',
@@ -41,7 +41,7 @@ async function main() {
   const domain = await (prisma as any).domain.create({
     data: {
       workspaceId: workspace.id,
-      domainName: 'skyreach.ai',
+      domainName: 'indieleads.ai',
       isVerified: true,
       spfValid: true,
       dkimValid: true,
@@ -54,7 +54,7 @@ async function main() {
     data: {
       workspaceId: workspace.id,
       domainId: domain.id,
-      email: 'alex@skyreach.ai',
+      email: 'alex@indieleads.ai',
       provider: 'google',
       credentials: { accessToken: 'stub', refreshToken: 'stub' },
       dailyLimit: 50,
@@ -80,7 +80,7 @@ async function main() {
           {
             order: 1,
             subject: 'Quick question about {{company}}',
-            body: 'Hey {{firstName}}, would love to chat about SkyReach.',
+            body: 'Hey {{firstName}}, would love to chat about IndieLeads.',
             delayDays: 0,
           },
           {

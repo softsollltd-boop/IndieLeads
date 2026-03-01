@@ -37,9 +37,7 @@ const UnsubscribePage: React.FC = () => {
             </div>
             <h1 className="text-3xl font-black tracking-tighter">You're Unsubscribed</h1>
             <p className="text-slate-400 font-medium">Your email has been removed from all sequences in this workspace. We won't contact you again.</p>
-            <div className="pt-8 border-t border-white/5 flex items-center justify-center text-[10px] uppercase font-black tracking-widest text-slate-500">
-              <ShieldCheck size={14} className="mr-2" /> Powered by SkyReach Protection
-            </div>
+            <ShieldCheck size={14} className="mr-2" /> Powered by IndieLeads Protection
           </>
         )}
         {status === 'error' && (

@@ -35,7 +35,7 @@ export class RepliesService {
     if (existing) return;
 
     // 2. Lead Identification
-    const logId = headers?.['x-skyreach-log-id'];
+    const logId = headers?.['x-indieleads-log-id'];
     let lead = null;
 
     if (logId) {
@@ -129,7 +129,7 @@ export class RepliesService {
     // Dispatch via SMTP
     await this.smtpAdapter.sendEmail(creds, {
       to: replyLog.lead.email,
-      fromName: replyLog.inbox.fromName || 'SkyReach User',
+      fromName: replyLog.inbox.fromName || 'IndieLeads User',
       subject: `Re: ${replyLog.subject}`,
       body,
       inReplyTo: replyLog.messageId,

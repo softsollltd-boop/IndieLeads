@@ -11,7 +11,7 @@ const TeamSettingsPage: React.FC<{ workspace?: { id: string } }> = ({ workspace 
 
     // Mock Members Data (Replace with API call later)
     const members = [
-        { id: '1', name: 'You', email: 'admin@skyreach.ai', role: 'Owner', avatar: 'ME' },
+        { id: '1', name: 'You', email: 'admin@indieleads.ai', role: 'Owner', avatar: 'ME' },
     ];
 
     const generateInvite = async () => {

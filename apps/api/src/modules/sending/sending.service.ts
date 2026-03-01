@@ -16,7 +16,7 @@ export class SendingService {
     private readonly queuesService: QueuesService,
     private readonly scheduler: InboxSchedulerService,
     private readonly mxService: MxService,
-  ) {}
+  ) { }
 
   async processCampaignBatch(campaign: any) {
     const { id: campaignId, workspaceId, settings, sequences } = campaign;
@@ -62,7 +62,7 @@ export class SendingService {
     for (const id of inboxIds) {
       const inbox = await (this.prisma as any).inbox.findUnique({ where: { id } });
       if (!inbox || inbox.status !== 'active') continue;
-      
+
       const isAvailable = await this.scheduler.checkInboxAvailability(id, {
         dailyLimit: inbox.dailyLimit,
         hourlyLimit: inbox.hourlyLimit
@@ -85,7 +85,7 @@ export class SendingService {
     const subject = this.personalize(step.subject, variables);
 
     if (campaign.settings.trackOpens) {
-      const pixelUrl = `${process.env.API_URL || 'https://api.skyreach.ai'}/api/v1/t/o/${logId}`;
+      const pixelUrl = `${process.env.API_URL || 'https://api.indieleads.ai'}/api/v1/t/o/${logId}`;
       body += `<img src="${pixelUrl}" width="1" height="1" style="display:none !important;" />`;
     }
 
@@ -127,7 +127,7 @@ export class SendingService {
   }
 
   private rewriteLinks(html: string, logId: string): string {
-    const trackingBase = process.env.API_URL || 'https://api.skyreach.ai/api/v1/t';
+    const trackingBase = process.env.API_URL || 'https://api.indieleads.ai/api/v1/t';
     return html.replace(/<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1/gi, (match, quote, url) => {
       if (url.startsWith('mailto:') || url.includes('unsub')) return match;
       const encodedUrl = Buffer.from(url).toString('base64url');

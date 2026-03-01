@@ -54,7 +54,7 @@ const Sidebar: React.FC<SidebarProps> = ({ workspace, onClose }) => {
         </motion.div>
         <div>
           <h1 className="font-bold text-xl tracking-tight font-heading text-slate-900">
-            SkyReach
+            IndieLeads
           </h1>
         </div>
       </div>

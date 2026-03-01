@@ -2,13 +2,21 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CampaignStatus, CampaignSettings } from '@shared/types';
+import { PlanEnforcementService } from '../workspaces/plan-enforcement.service';
+import { AbuseFilterService } from '../common/abuse-filter.service';
 import { CreateCampaignDto, UpdateCampaignDto } from './dto/campaign.dto';
 
 @Injectable()
 export class CampaignsService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly planEnforcement: PlanEnforcementService,
+    private readonly abuseFilter: AbuseFilterService,
+  ) { }
 
   async create(workspaceId: string, dto: CreateCampaignDto) {
+    // Plan Enforcement: Check if workspace has reached its campaign limit
+    await this.planEnforcement.checkCampaignLimit(workspaceId);
     return this.prisma.campaign.create({
       data: {
         workspaceId,
@@ -92,6 +100,9 @@ export class CampaignsService {
   }
 
   async updateSequence(workspaceId: string, id: string, steps: any[]) {
+    // Abuse Filter: Check steps for spam content
+    this.abuseFilter.validateSequence(steps);
+
     // Transactional update: delete old steps and create new ones
     return this.prisma.$transaction(async (tx) => {
       await tx.sequenceStep.deleteMany({ where: { campaignId: id } });

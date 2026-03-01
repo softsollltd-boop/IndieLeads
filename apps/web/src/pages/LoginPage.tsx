@@ -59,8 +59,8 @@ const LoginPage: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
           >
             <Zap className="text-white w-8 h-8 fill-current" />
           </motion.div>
-          <h1 className="text-3xl font-bold text-slate-900 font-heading">SkyReach</h1>
-          <p className="text-slate-500 font-medium mt-2">The Enterprise Deliverability Protocol</p>
+          <h1 className="text-3xl font-bold text-slate-900 font-heading">IndieLeads</h1>
+          <p className="text-slate-500 font-medium mt-2">The Pro Deliverability Protocol</p>
         </div>
 
         {error && (
@@ -126,13 +126,13 @@ const LoginPage: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
 
         <div className="mt-10 pt-8 border-t border-slate-100 text-center">
           <p className="text-sm text-slate-500 font-medium">
-            New to SkyReach? <button onClick={() => navigate('/signup')} className="text-emerald-600 font-semibold hover:text-emerald-700">Create an account</button>
+            New to IndieLeads? <button onClick={() => navigate('/signup')} className="text-emerald-600 font-semibold hover:text-emerald-700">Create an account</button>
           </p>
         </div>
 
         <div className="mt-8 flex items-center justify-center space-x-2 text-xs text-slate-400 font-medium">
           <ShieldCheck size={14} className="text-emerald-500" />
-          <span>Enterprise grade security included</span>
+          <span>World-class security included</span>
         </div>
       </motion.div>
     </div >

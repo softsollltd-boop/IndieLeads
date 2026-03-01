@@ -18,7 +18,7 @@ COPY packages ./packages
 # Install dependencies and build
 RUN npm install
 RUN npx prisma generate --schema=./prisma/schema.prisma
-RUN npm run build:api && npm run build:workers
+RUN npm run build:api && npm run build:workers && npm run build:web
 
 # STEP 2: Runtime Stage
 FROM node:20-slim AS runner
@@ -48,9 +48,9 @@ USER node
 EXPOSE 3000
 
 # Enterprise Labeling for Coolify/Discovery
-LABEL maintainer="SkyReach Platform"
+LABEL maintainer="IndieLeads Platform"
 LABEL version="1.0.0"
-LABEL org.opencontainers.image.description="Enterprise Cold Email Engine"
+LABEL org.opencontainers.image.description="IndieLeads Enterprise Cold Email Engine"
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
   CMD node -e "require('http').get('http://localhost:' + (process.env.PORT || 3000) + '/api/v1/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })" || exit 1
