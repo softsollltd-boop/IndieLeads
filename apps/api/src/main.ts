@@ -8,7 +8,6 @@ import { json, urlencoded } from 'express';
 
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import * as Sentry from "@sentry/nestjs";
-import { nodeProfilingIntegration } from "@sentry/profiling-node";
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -17,11 +16,7 @@ async function bootstrap() {
   if (sentryDsn) {
     Sentry.init({
       dsn: sentryDsn,
-      integrations: [
-        nodeProfilingIntegration(),
-      ],
       tracesSampleRate: 1.0,
-      profilesSampleRate: 1.0,
     });
     logger.log('Sentry Error Tracking initialized.');
   }

@@ -12,9 +12,9 @@
     "dev:api": "cd apps/api && npm run start:dev",
     "dev:workers": "cd apps/workers && npm run start",
     "build:web": "cd apps/web && npm run build",
-    "build:api": "cd apps/api && npx prisma generate --schema=../../prisma/schema.prisma && nest build",
-    "build:workers": "cd apps/workers && npx prisma generate --schema=../../prisma/schema.prisma && nest build",
-    "build": "npm run build:api && npm run build:workers",
+    "build:api": "cd apps/api && nest build",
+    "build:workers": "cd apps/workers && nest build",
+    "build": "npx prisma generate --schema=./prisma/schema.prisma && npm run build:api && npm run build:workers",
     "start:api": "node apps/api/dist/main.js",
     "start:workers": "node apps/workers/dist/main.js",
     "prisma:push": "npx prisma db push --schema=./prisma/schema.prisma"

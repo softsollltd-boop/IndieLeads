@@ -17,8 +17,7 @@ COPY packages ./packages
 
 # Install dependencies and build
 RUN npm install
-RUN npx prisma generate --schema=./prisma/schema.prisma
-RUN npm run build:api && npm run build:workers && npm run build:web
+RUN npm run build
 
 # STEP 2: Runtime Stage
 FROM node:20-slim AS runner
