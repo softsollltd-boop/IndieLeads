@@ -41,14 +41,19 @@ async function bootstrap() {
         'http://localhost',
       ];
 
-      // Add frontendUrl to allowed if exists
-      if (frontendUrl) allowedOrigins.push(frontendUrl);
+      if (frontendUrl) {
+        // Support comma-separated URLs
+        const splitUrls = frontendUrl.split(',').map(u => u.trim());
+        allowedOrigins.push(...splitUrls);
+      }
 
-      if (!origin || allowedOrigins.includes(origin) || (frontendUrl && origin === frontendUrl)) {
+      const isCloudflarePages = origin?.endsWith('.pages.dev');
+
+      if (!origin || allowedOrigins.includes(origin) || isCloudflarePages) {
         callback(null, true);
       } else {
         corsLogger.warn(`Blocked Origin: ${origin}`);
-        callback(new Error('Not allowed by CORS'));
+        callback(new Error(`Not allowed by CORS: ${origin}`));
       }
     },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
