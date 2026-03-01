@@ -38,9 +38,10 @@ COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/prisma ./prisma
 COPY scripts/entrypoint.sh ./scripts/entrypoint.sh
 
-# Security: Run as non-root user
-# Ensure node user owns the app directory
-RUN chmod +x ./scripts/entrypoint.sh && chown -R node:node /app
+# Fix line endings (CRLF -> LF) for Windows users and ensure execution
+RUN sed -i 's/\r$//' ./scripts/entrypoint.sh && \
+  chmod +x ./scripts/entrypoint.sh && \
+  chown -R node:node /app
 USER node
 
 # Expose the API port
