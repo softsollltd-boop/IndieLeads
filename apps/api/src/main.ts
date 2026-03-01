@@ -42,18 +42,19 @@ async function bootstrap() {
       ];
 
       if (frontendUrl) {
-        // Support comma-separated URLs
-        const splitUrls = frontendUrl.split(',').map(u => u.trim());
+        // Support comma-separated URLs and strip trailing slashes
+        const splitUrls = frontendUrl.split(',').map(u => u.trim().replace(/\/$/, ''));
         allowedOrigins.push(...splitUrls);
       }
 
-      const isCloudflarePages = origin?.endsWith('.pages.dev');
+      const cleanOrigin = origin?.replace(/\/$/, '');
+      const isCloudflarePages = cleanOrigin?.endsWith('.pages.dev');
 
-      if (!origin || allowedOrigins.includes(origin) || isCloudflarePages) {
+      if (!origin || allowedOrigins.includes(cleanOrigin) || isCloudflarePages) {
         callback(null, true);
       } else {
-        corsLogger.warn(`Blocked Origin: ${origin}`);
-        callback(new Error(`Not allowed by CORS: ${origin}`));
+        corsLogger.warn(`CORS Blocked Origin: ${origin}`);
+        callback(null, false);
       }
     },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
