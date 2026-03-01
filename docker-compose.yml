@@ -1,7 +1,22 @@
-
-
-
 services:
+  # Main Database
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=indieleads
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Main API Gateway
   api:
     build: .
@@ -13,6 +28,8 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - MASTER_ENCRYPTION_KEY=${MASTER_ENCRYPTION_KEY}
     depends_on:
+      db:
+        condition: service_healthy
       redis:
         condition: service_healthy
     deploy:
@@ -30,6 +47,8 @@ services:
       - REDIS_URL=${REDIS_URL:-redis://redis:6379}
       - API_KEY=${API_KEY}
     depends_on:
+      db:
+        condition: service_healthy
       redis:
         condition: service_healthy
     deploy:
@@ -47,6 +66,8 @@ services:
       - REDIS_URL=redis://redis:6379
       - API_KEY=${API_KEY}
     depends_on:
+      db:
+        condition: service_healthy
       redis:
         condition: service_healthy
     deploy:
@@ -60,7 +81,10 @@ services:
     ports:
       - "6379:6379"
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 5
+
+volumes:
+  postgres_data:
