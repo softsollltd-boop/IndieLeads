@@ -41,7 +41,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
             const modelsWithWorkspace = [
               'Inbox', 'Domain', 'Lead', 'Campaign', 'SendingLog',
               'ReplyLog', 'Member', 'WarmupAccount', 'SequenceStep',
-              'AuditLog', 'Notification'
+              'AuditLog', 'Notification', 'DeliverabilityTest'
             ];
 
             // Models that are global or isolated by other means (e.g., User by ID)
@@ -97,6 +97,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   get sequenceStep() { return this.client.sequenceStep; }
   get auditLog() { return this.client.auditLog; }
   get notification() { return this.client.notification; }
+  get deliverabilityTest() { return this.client.deliverabilityTest; }
   get $queryRaw() { return this.client.$queryRaw; }
 
   /**
