@@ -10,10 +10,10 @@ echo "🚀 Starting Production Entrypoint..."
 echo "🔄 Generating Prisma Client..."
 npx prisma generate
 
-# Sync database schema (Production-safe migrations)
+# Sync database schema (Using db push for first-time setup/no migrations)
 if [ "$RUN_MIGRATIONS" = "true" ]; then
-  echo "⏩ Running production migrations..."
-  npx prisma migrate deploy
+  echo "⏩ Syncing database schema to Supabase..."
+  npx prisma db push --schema=./prisma/schema.prisma --accept-data-loss
 else
   echo "⏩ Skipping database sync (RUN_MIGRATIONS != true)"
 fi
