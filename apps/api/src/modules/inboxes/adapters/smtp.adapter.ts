@@ -21,8 +21,16 @@ export class SmtpAdapter implements EmailProviderAdapter {
           ? { type: 'OAuth2', user: credentials.smtpUser, accessToken: credentials.accessToken }
           : { user: credentials.smtpUser, pass: credentials.smtpPass };
 
+        // Defensive host fallback if missing
+        let host = credentials.smtpHost;
+        if (!host) {
+          const email = credentials.smtpUser || '';
+          if (email.endsWith('@gmail.com')) host = 'smtp.gmail.com';
+          else if (email.endsWith('@outlook.com') || email.endsWith('@hotmail.com')) host = 'smtp.office365.com';
+        }
+
         const transporter = nodemailer.createTransport({
-          host: credentials.smtpHost || (credentials.accessToken ? 'smtp.gmail.com' : undefined),
+          host: host || (credentials.accessToken ? 'smtp.gmail.com' : undefined),
           port: credentials.smtpPort || 465,
           secure: credentials.smtpPort === 465 || !credentials.smtpPort,
           auth,
@@ -138,8 +146,16 @@ export class SmtpAdapter implements EmailProviderAdapter {
       pass: credentials.smtpPass,
     };
 
+    // Defensive host fallback if missing
+    let host = credentials.smtpHost;
+    if (!host) {
+      const email = credentials.smtpUser || '';
+      if (email.endsWith('@gmail.com')) host = 'smtp.gmail.com';
+      else if (email.endsWith('@outlook.com') || email.endsWith('@hotmail.com')) host = 'smtp.office365.com';
+    }
+
     const transporter = nodemailer.createTransport({
-      host: credentials.smtpHost || (credentials.accessToken ? 'smtp.gmail.com' : undefined),
+      host: host || (credentials.accessToken ? 'smtp.gmail.com' : undefined),
       port: credentials.smtpPort || 465,
       secure: credentials.smtpPort === 465 || !credentials.smtpPort,
       auth,

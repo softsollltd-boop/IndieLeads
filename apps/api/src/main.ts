@@ -8,8 +8,12 @@ import { json, urlencoded } from 'express';
 
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import * as Sentry from "@sentry/nestjs";
+import * as dns from 'dns';
 
 async function bootstrap() {
+  // Force IPv4 preference for all DNS lookups to prevent ENETUNREACH on IPv6-only environments (Render)
+  dns.setDefaultResultOrder('ipv4first');
+
   const logger = new Logger('Bootstrap');
 
   const sentryDsn = process.env.SENTRY_DSN;
