@@ -25,7 +25,7 @@ const getBaseURL = () => {
 
 const apiClient = axios.create({
   baseURL: getBaseURL(),
-  timeout: 30000, // Enterprise standard timeout
+  timeout: 25000, // 25s — leaves room for SMTP+IMAP check (2x10s) plus network
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'

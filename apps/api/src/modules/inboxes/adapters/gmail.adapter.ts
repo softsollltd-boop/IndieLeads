@@ -1,14 +1,15 @@
 
 import { Injectable, Logger } from '@nestjs/common';
-import { EmailProviderAdapter, ProviderHealth } from './provider.adapter';
+import { EmailProviderAdapter, ProviderHealth, ValidationResult } from './provider.adapter';
 
 @Injectable()
 export class GmailAdapter implements EmailProviderAdapter {
   private readonly logger = new Logger(GmailAdapter.name);
 
-  async validateCredentials(credentials: any): Promise<boolean> {
+  async validateCredentials(credentials: any): Promise<ValidationResult> {
     this.logger.debug('Validating Google OAuth tokens...');
-    return !!credentials.accessToken;
+    if (!credentials.accessToken) return { isValid: false, error: 'Missing Google OAuth access token.' };
+    return { isValid: true };
   }
 
   async sendEmail(credentials: any, payload: any): Promise<{ messageId: string }> {
@@ -20,7 +21,7 @@ export class GmailAdapter implements EmailProviderAdapter {
     this.logger.debug(`Fetching Gmail replies since ${lastCheck.toISOString()}`);
     // Real implementation would use:
     // gmail.users.messages.list({ q: `after:${lastCheck.getTime() / 1000} label:INBOX -label:SENT` })
-    return []; 
+    return [];
   }
 
   async healthCheck(credentials: any): Promise<ProviderHealth> {

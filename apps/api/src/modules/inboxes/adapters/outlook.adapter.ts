@@ -1,14 +1,15 @@
 
 import { Injectable, Logger } from '@nestjs/common';
-import { EmailProviderAdapter, ProviderHealth } from './provider.adapter';
+import { EmailProviderAdapter, ProviderHealth, ValidationResult } from './provider.adapter';
 
 @Injectable()
 export class OutlookAdapter implements EmailProviderAdapter {
   private readonly logger = new Logger(OutlookAdapter.name);
 
-  async validateCredentials(credentials: any): Promise<boolean> {
+  async validateCredentials(credentials: any): Promise<ValidationResult> {
     this.logger.debug('Validating Microsoft Graph tokens...');
-    return !!credentials.accessToken;
+    if (!credentials.accessToken) return { isValid: false, error: 'Missing Microsoft OAuth access token.' };
+    return { isValid: true };
   }
 
   async sendEmail(credentials: any, payload: any): Promise<{ messageId: string }> {

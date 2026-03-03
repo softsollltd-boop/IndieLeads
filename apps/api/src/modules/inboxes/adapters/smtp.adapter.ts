@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { EmailProviderAdapter, ProviderHealth } from './provider.adapter';
+import { EmailProviderAdapter, ProviderHealth, ValidationResult } from './provider.adapter';
 import * as nodemailer from 'nodemailer';
 import * as imaps from 'imap-simple';
 import { simpleParser } from 'mailparser';
@@ -8,31 +8,123 @@ import { simpleParser } from 'mailparser';
 export class SmtpAdapter implements EmailProviderAdapter {
   private readonly logger = new Logger(SmtpAdapter.name);
 
-  async validateCredentials(credentials: any): Promise<boolean> {
-    try {
-      const auth: any = credentials.accessToken ? {
-        type: 'OAuth2',
-        user: credentials.smtpUser,
-        accessToken: credentials.accessToken,
-      } : {
-        user: credentials.smtpUser,
-        pass: credentials.smtpPass,
-      };
+  async validateCredentials(credentials: any): Promise<ValidationResult> {
+    const TIMEOUT_MS = 10000;
 
-      const transporter = nodemailer.createTransport({
-        host: credentials.smtpHost || (credentials.accessToken ? 'smtp.gmail.com' : undefined),
-        port: credentials.smtpPort || 465,
-        secure: credentials.smtpPort === 465 || !credentials.smtpPort,
-        auth,
-        tls: { rejectUnauthorized: false }
+    const smtpCheck = async (): Promise<ValidationResult> => {
+      return new Promise((resolve) => {
+        const timer = setTimeout(() => {
+          resolve({ isValid: false, error: 'SMTP connection timed out. Check your host, port and firewall settings.' });
+        }, TIMEOUT_MS);
+
+        const auth: any = credentials.accessToken
+          ? { type: 'OAuth2', user: credentials.smtpUser, accessToken: credentials.accessToken }
+          : { user: credentials.smtpUser, pass: credentials.smtpPass };
+
+        const transporter = nodemailer.createTransport({
+          host: credentials.smtpHost || (credentials.accessToken ? 'smtp.gmail.com' : undefined),
+          port: credentials.smtpPort || 465,
+          secure: credentials.smtpPort === 465 || !credentials.smtpPort,
+          auth,
+          tls: { rejectUnauthorized: false },
+          connectionTimeout: TIMEOUT_MS,
+          greetingTimeout: TIMEOUT_MS,
+          socketTimeout: TIMEOUT_MS,
+        });
+
+        transporter.verify()
+          .then(() => { clearTimeout(timer); resolve({ isValid: true }); })
+          .catch((err) => {
+            clearTimeout(timer);
+            const message = this.humanizeSmtpError(err);
+            this.logger.error(`SMTP check failed for ${credentials.smtpUser}: ${err.message}`);
+            resolve({ isValid: false, error: message });
+          });
       });
-      await transporter.verify();
-      return true;
-    } catch (err) {
-      this.logger.error(`Protocol check failed for ${credentials.smtpUser}: ${err.message}`);
-      return false;
-    }
+    };
+
+    const imapCheck = async (): Promise<ValidationResult> => {
+      return new Promise((resolve) => {
+        const timer = setTimeout(() => {
+          resolve({ isValid: false, error: 'IMAP connection timed out. Check your IMAP host and port.' });
+        }, TIMEOUT_MS);
+
+        const config: any = {
+          imap: {
+            user: credentials.imapUser || credentials.smtpUser,
+            password: credentials.imapPass || credentials.smtpPass,
+            host: credentials.imapHost || (credentials.accessToken ? 'imap.gmail.com' : undefined),
+            port: credentials.imapPort || 993,
+            tls: true,
+            authTimeout: TIMEOUT_MS,
+            tlsOptions: { rejectUnauthorized: false },
+          }
+        };
+
+        if (credentials.accessToken) {
+          config.imap.xoauth2 = credentials.accessToken;
+          delete config.imap.password;
+        }
+
+        imaps.connect(config)
+          .then(async (conn) => {
+            clearTimeout(timer);
+            await conn.end();
+            resolve({ isValid: true });
+          })
+          .catch((err) => {
+            clearTimeout(timer);
+            const message = this.humanizeImapError(err);
+            this.logger.error(`IMAP check failed for ${config.imap.user}: ${err.message}`);
+            resolve({ isValid: false, error: message });
+          });
+      });
+    };
+
+    const [smtpResult, imapResult] = await Promise.all([smtpCheck(), imapCheck()]);
+
+    if (!smtpResult.isValid) return smtpResult;
+    if (!imapResult.isValid) return imapResult;
+    return { isValid: true };
   }
+
+  private humanizeSmtpError(err: any): string {
+    const msg = (err.message || '').toLowerCase();
+    if (msg.includes('invalid login') || msg.includes('authentication failed') || msg.includes('535') || msg.includes('incorrect') || msg.includes('bad credentials')) {
+      return 'SMTP: Invalid credentials. For Google/Microsoft use an App Password, not your account password.';
+    }
+    if (msg.includes('econnrefused') || msg.includes('connect econnrefused')) {
+      return `SMTP: Connection refused on port ${err.port || 'specified'}. Check your SMTP host and port.`;
+    }
+    if (msg.includes('enotfound') || msg.includes('getaddrinfo')) {
+      return 'SMTP: Hostname not found. Check your SMTP host address.';
+    }
+    if (msg.includes('etimeout') || msg.includes('timeout')) {
+      return 'SMTP: Connection timed out. Check your host, port and firewall settings.';
+    }
+    if (msg.includes('self signed') || msg.includes('certificate')) {
+      return 'SMTP: TLS certificate error. Try switching the port.';
+    }
+    return `SMTP Error: ${err.message}`;
+  }
+
+  private humanizeImapError(err: any): string {
+    const msg = (err.message || '').toLowerCase();
+    if (msg.includes('invalid credentials') || msg.includes('authenticationfailed') || msg.includes('login failed')) {
+      return 'IMAP: Invalid credentials. For Google, ensure IMAP is enabled in Gmail settings.';
+    }
+    if (msg.includes('econnrefused')) {
+      return 'IMAP: Connection refused. Check your IMAP host and port.';
+    }
+    if (msg.includes('enotfound')) {
+      return 'IMAP: Hostname not found. Check your IMAP host address.';
+    }
+    if (msg.includes('timeout') || msg.includes('timedout')) {
+      return 'IMAP: Connection timed out. Check your IMAP host and port.';
+    }
+    return `IMAP Error: ${err.message}`;
+  }
+
 
   async sendEmail(credentials: any, payload: any): Promise<{ messageId: string }> {
     const auth: any = credentials.accessToken ? {
@@ -150,10 +242,10 @@ export class SmtpAdapter implements EmailProviderAdapter {
   }
 
   async healthCheck(credentials: any): Promise<ProviderHealth> {
-    const isValid = await this.validateCredentials(credentials);
+    const result = await this.validateCredentials(credentials);
     return {
-      status: isValid ? 'active' : 'disconnected',
-      score: isValid ? 100 : 0
+      status: result.isValid ? 'active' : 'disconnected',
+      score: result.isValid ? 100 : 0
     };
   }
 }

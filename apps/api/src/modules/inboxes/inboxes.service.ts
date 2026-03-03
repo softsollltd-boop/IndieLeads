@@ -48,12 +48,12 @@ export class InboxesService {
     }
 
     // Authenticate and validate protocol connectivity
-    const isValid = dto.credentials.accessToken
-      ? true
+    const validation = dto.credentials.accessToken
+      ? { isValid: true }
       : await this.smtpAdapter.validateCredentials(dto.credentials);
 
-    if (!isValid) {
-      throw new BadRequestException(`Authentication Failed: Protocol handshake rejected by ${dto.provider}. Verify app passwords and security settings.`);
+    if (!validation.isValid) {
+      throw new BadRequestException(validation.error || `Authentication Failed: Protocol handshake rejected by ${dto.provider}. Verify app passwords and security settings.`);
     }
 
     // Automated Domain Management
