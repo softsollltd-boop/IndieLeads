@@ -124,9 +124,29 @@ const AppContent: React.FC = () => {
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 scroll-smooth relative">
           <AnimatePresence mode="wait" initial={false}>
             <Routes location={location} key={location.pathname}>
-              <Route path="/login" element={<PageTransition><LoginPage onLogin={handleLogin} /></PageTransition>} />
+              {/* Public Entrance Routes */}
+              <Route
+                path="/"
+                element={
+                  isAuthenticated ? (
+                    <Navigate to="/dashboard" replace />
+                  ) : (
+                    <PageTransition><LandingPage /></PageTransition>
+                  )
+                }
+              />
+              <Route
+                path="/login"
+                element={
+                  isAuthenticated ? (
+                    <Navigate to="/dashboard" replace />
+                  ) : (
+                    <PageTransition><LoginPage onLogin={handleLogin} /></PageTransition>
+                  )
+                }
+              />
               <Route path="/signup" element={<PageTransition><SignupPage /></PageTransition>} />
-              <Route path="/" element={<PageTransition><LandingPage /></PageTransition>} />
+
               <Route path="/terms" element={<PageTransition><TermsPage /></PageTransition>} />
               <Route path="/privacy" element={<PageTransition><PrivacyPage /></PageTransition>} />
               <Route path="/accept-invite/:token" element={<PageTransition><AcceptInvitePage /></PageTransition>} />
