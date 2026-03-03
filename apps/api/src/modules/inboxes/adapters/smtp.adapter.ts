@@ -141,6 +141,10 @@ export class SmtpAdapter implements EmailProviderAdapter {
       port: credentials.smtpPort || 465,
       secure: credentials.smtpPort === 465 || !credentials.smtpPort,
       auth,
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
+      tls: { rejectUnauthorized: false },
     });
 
     try {
@@ -150,7 +154,7 @@ export class SmtpAdapter implements EmailProviderAdapter {
         subject: payload.subject,
         html: payload.body,
         headers: {
-          'X-IndieLeads-Log-ID': payload.logId, // CRITICAL: This is used for reply tracking
+          'X-IndieLeads-Log-ID': payload.logId,
           'Message-ID': `<${payload.logId || Math.random().toString(36).substring(7)}@indieleads.ai>`,
           'List-Unsubscribe': `<${process.env.FRONTEND_URL}/#/unsub/${payload.leadId}>`,
           ...(payload.inReplyTo ? { 'In-Reply-To': payload.inReplyTo } : {}),
@@ -160,7 +164,18 @@ export class SmtpAdapter implements EmailProviderAdapter {
       return { messageId: info.messageId };
     } catch (err) {
       this.logger.error(`SMTP Dispatch Error: ${err.message}`);
-      throw new Error('PROVIDER_REJECTED');
+      // Throw a human-readable error so the user knows exactly what went wrong
+      const msg = (err.message || '').toLowerCase();
+      if (msg.includes('invalid login') || msg.includes('535') || msg.includes('authentication') || msg.includes('credentials')) {
+        throw new Error('Invalid credentials. Make sure you are using a Gmail App Password, not your regular account password.');
+      }
+      if (msg.includes('econnrefused') || msg.includes('enotfound') || msg.includes('getaddrinfo')) {
+        throw new Error(`Cannot reach SMTP server at ${credentials.smtpHost}:${credentials.smtpPort}. Check your host settings.`);
+      }
+      if (msg.includes('timeout') || msg.includes('etimeout')) {
+        throw new Error('SMTP connection timed out. Your hosting provider may be blocking outbound email ports.');
+      }
+      throw new Error(err.message || 'Email provider rejected the request.');
     }
   }
 

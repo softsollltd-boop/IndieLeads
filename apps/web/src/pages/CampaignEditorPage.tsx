@@ -179,6 +179,7 @@ const CampaignEditorPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }
   // Test Send State
   const [isTestSendOpen, setIsTestSendOpen] = useState(false);
   const [testSendConfig, setTestSendConfig] = useState({ inboxId: '', to: '' });
+  const [testSendError, setTestSendError] = useState('');
 
   // Helper to sync activeStepId
   useEffect(() => {
@@ -872,48 +873,57 @@ const CampaignEditorPage: React.FC<{ theme: 'ethereal' | 'glass' }> = ({ theme }
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="glass-surface p-8 rounded-xl border border-slate-200 w-full max-w-md space-y-6">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-bold font-heading text-slate-900">Send Test Email</h3>
-                <button onClick={() => setIsTestSendOpen(false)} className="text-slate-500 hover:text-slate-900"><X size={20} /></button>
+                <button onClick={() => { setIsTestSendOpen(false); setTestSendError(''); }} className="text-slate-500 hover:text-slate-900"><X size={20} /></button>
               </div>
               <div className="space-y-4">
+                {testSendError && (
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium flex items-start gap-3">
+                    <span className="text-red-500 mt-0.5 shrink-0">⚠</span>
+                    <span>{testSendError}</span>
+                  </div>
+                )}
                 <div>
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Sender Node</label>
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">From Inbox</label>
                   <select
                     value={testSendConfig.inboxId}
                     onChange={(e) => setTestSendConfig({ ...testSendConfig, inboxId: e.target.value })}
-                    className={`w-full h-12 px-4 mt-2 rounded-xl text-xs font-bold outline-none ${isEthereal ? 'bg-slate-50 border-slate-200' : 'bg-black/20 border-white/10 text-white'}`}
+                    className={`w-full h-12 px-4 mt-2 rounded-xl text-xs font-bold outline-none ${isEthereal ? 'bg-slate-50 border border-slate-200' : 'bg-black/20 border border-white/10 text-white'}`}
                   >
-                    <option value="">Select Inbox...</option>
+                    <option value="">Select sending inbox...</option>
                     {inboxes.map(i => <option key={i.id} value={i.id}>{i.email}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Recipient Target</label>
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">To Email</label>
                   <input
                     value={testSendConfig.to}
                     onChange={(e) => setTestSendConfig({ ...testSendConfig, to: e.target.value })}
-                    placeholder="receiver@example.com"
-                    className={`w-full h-12 px-4 mt-2 rounded-xl text-xs font-bold outline-none ${isEthereal ? 'bg-slate-50 border-slate-200' : 'bg-black/20 border-white/10 text-white'}`}
+                    placeholder="yourname@example.com"
+                    className={`w-full h-12 px-4 mt-2 rounded-xl text-xs font-bold outline-none ${isEthereal ? 'bg-slate-50 border border-slate-200' : 'bg-black/20 border border-white/10 text-white'}`}
                   />
                 </div>
                 <button
                   onClick={async () => {
-                    if (!testSendConfig.inboxId || !testSendConfig.to) return alert('Select inbox and recipient');
+                    if (!testSendConfig.inboxId || !testSendConfig.to) { setTestSendError('Please select an inbox and enter a recipient email.'); return; }
+                    setTestSendError('');
                     try {
                       const step1 = steps[0];
                       await apiClient.post(`/inboxes/${testSendConfig.inboxId}/send-test`, {
                         to: testSendConfig.to,
-                        subject: step1?.subject || 'Test Subject',
-                        body: step1?.body || 'Test Body'
+                        subject: step1?.subject || 'Test Email from IndieLeads',
+                        body: step1?.body || '<p>This is a test email sent from IndieLeads.</p>'
                       });
-                      alert('Test transmission dispatched.');
+                      alert('✅ Test email sent! Check your inbox.');
                       setIsTestSendOpen(false);
-                    } catch (err) {
-                      alert('Transmission failed.');
+                      setTestSendError('');
+                    } catch (err: any) {
+                      const msg = err.response?.data?.message || err.message || 'Failed to send. Check your inbox credentials.';
+                      setTestSendError(msg);
                     }
                   }}
                   className="w-full btn-primary h-12 rounded-xl font-black uppercase tracking-widest text-xs flex items-center justify-center"
                 >
-                  <Zap size={16} className="mr-2" /> Dispatch Now
+                  <Zap size={16} className="mr-2" /> Send Test Email
                 </button>
               </div>
             </motion.div>
