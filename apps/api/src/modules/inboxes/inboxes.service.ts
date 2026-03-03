@@ -230,12 +230,24 @@ export class InboxesService {
 
   /**
    * Retrieves and decrypts credentials for system operations.
+   * Includes auto-migration for legacy configurations (e.g. port 465 -> 587 for Gmail).
    */
   async getDecryptedCredentials(id: string) {
     const inbox = await this.prisma.inbox.findUnique({ where: { id } });
     if (!inbox) throw new NotFoundException('Account credentials not found.');
     const decrypted = this.security.decrypt(inbox.credentials);
-    return JSON.parse(decrypted);
+    const creds = JSON.parse(decrypted);
+
+    // Auto-migrate legacy Gmail configurations to more stable settings
+    if (inbox.provider === InboxProvider.GOOGLE || creds.smtpUser?.endsWith('@gmail.com')) {
+      if (!creds.smtpHost) creds.smtpHost = 'smtp.gmail.com';
+      if (Number(creds.smtpPort) === 465 || !creds.smtpPort) creds.smtpPort = 587;
+    } else if (inbox.provider === InboxProvider.OUTLOOK || creds.smtpUser?.endsWith('@outlook.com')) {
+      if (!creds.smtpHost) creds.smtpHost = 'smtp.office365.com';
+      if (Number(creds.smtpPort) === 465 || !creds.smtpPort) creds.smtpPort = 587;
+    }
+
+    return creds;
   }
 
   /**

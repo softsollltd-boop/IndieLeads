@@ -31,8 +31,8 @@ export class SmtpAdapter implements EmailProviderAdapter {
 
         const transporter = nodemailer.createTransport({
           host: host || (credentials.accessToken ? 'smtp.gmail.com' : undefined),
-          port: credentials.smtpPort || 465,
-          secure: credentials.smtpPort === 465 || !credentials.smtpPort,
+          port: credentials.smtpPort || 587, // Default to 587 for better cloud reach
+          secure: Number(credentials.smtpPort) === 465,
           auth,
           tls: { rejectUnauthorized: false },
           connectionTimeout: TIMEOUT_MS,
@@ -40,6 +40,10 @@ export class SmtpAdapter implements EmailProviderAdapter {
           socketTimeout: TIMEOUT_MS,
           // Force IPv4: Render cannot route IPv6 to Gmail SMTP (ENETUNREACH)
           family: 4,
+          // Custom lookup to strictly force IPv4 at the DNS level
+          lookup: (hostname, options, callback) => {
+            require('dns').lookup(hostname, { ...options, family: 4 }, callback);
+          }
         } as any);
 
         transporter.verify()
@@ -156,8 +160,8 @@ export class SmtpAdapter implements EmailProviderAdapter {
 
     const transporter = nodemailer.createTransport({
       host: host || (credentials.accessToken ? 'smtp.gmail.com' : undefined),
-      port: credentials.smtpPort || 465,
-      secure: credentials.smtpPort === 465 || !credentials.smtpPort,
+      port: credentials.smtpPort || 587, // Default to 587 for better cloud reach
+      secure: Number(credentials.smtpPort) === 465,
       auth,
       connectionTimeout: 10000,
       greetingTimeout: 10000,
@@ -165,6 +169,10 @@ export class SmtpAdapter implements EmailProviderAdapter {
       tls: { rejectUnauthorized: false },
       // Force IPv4: Render cannot route IPv6 to Gmail SMTP (ENETUNREACH)
       family: 4,
+      // Custom lookup to strictly force IPv4 at the DNS level
+      lookup: (hostname, options, callback) => {
+        require('dns').lookup(hostname, { ...options, family: 4 }, callback);
+      }
     } as any);
 
     try {
