@@ -37,7 +37,7 @@ export class InboxesService {
     // Dynamic configuration for managed providers
     if (dto.provider === InboxProvider.GOOGLE && (!dto.credentials.smtpHost)) {
       dto.credentials.smtpHost = 'smtp.gmail.com';
-      dto.credentials.smtpPort = 465;
+      dto.credentials.smtpPort = 587; // Port 587 is more reliable on cloud PaaS
       dto.credentials.imapHost = 'imap.gmail.com';
       dto.credentials.imapPort = 993;
     } else if (dto.provider === InboxProvider.OUTLOOK && (!dto.credentials.smtpHost)) {

@@ -10,10 +10,10 @@ const PROVIDER_CONFIGS = {
   google: {
     name: 'Google Workspace',
     smtpHost: 'smtp.gmail.com',
-    smtpPort: 465,
+    smtpPort: 587,
     imapHost: 'imap.gmail.com',
     imapPort: 993,
-    help: 'Requires a 16-character App Password generated in your Google Account security settings.'
+    help: 'Requires a 16-character App Password generated in your Google Account security settings. Using Port 587 for better reliability.'
   },
   outlook: {
     name: 'Microsoft 365',
@@ -57,7 +57,7 @@ const AddInboxModal: React.FC<{ isOpen: boolean; onClose: () => void; onCreated:
   const resetForm = () => {
     setStep(1);
     setProvider(null);
-    setFormData({ email: '', password: '', fromName: '', smtpHost: '', smtpPort: 465, imapHost: '', imapPort: 993 });
+    setFormData({ email: '', password: '', fromName: '', smtpHost: '', smtpPort: 587, imapHost: '', imapPort: 993 });
     setError('');
   };
 

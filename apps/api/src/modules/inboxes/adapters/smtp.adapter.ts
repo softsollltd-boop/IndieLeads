@@ -115,7 +115,7 @@ export class SmtpAdapter implements EmailProviderAdapter {
     if (msg.includes('self signed') || msg.includes('certificate')) {
       return 'SMTP: TLS certificate error. Try switching the port.';
     }
-    return `SMTP Error: ${err.message}`;
+    return `SMTP Error: ${err.message}${err.code ? ` (${err.code})` : ''}${err.address ? ` to ${err.address}` : ''}`;
   }
 
   private humanizeImapError(err: any): string {
@@ -190,10 +190,10 @@ export class SmtpAdapter implements EmailProviderAdapter {
         throw new Error('Invalid credentials. Make sure you are using a Gmail App Password, not your regular account password.');
       }
       if (msg.includes('econnrefused') || msg.includes('enotfound') || msg.includes('getaddrinfo') || msg.includes('enetunreach')) {
-        throw new Error(`Cannot reach SMTP server at ${credentials.smtpHost || 'smtp.gmail.com'}. Check your host settings or try a different port.`);
+        throw new Error(`Cannot reach SMTP server at ${host || 'smtp.gmail.com'}. Reason: ${err.message}. Check your host settings or try port 587.`);
       }
       if (msg.includes('timeout') || msg.includes('etimeout')) {
-        throw new Error('SMTP connection timed out. Your hosting provider may be blocking outbound email ports.');
+        throw new Error(`SMTP connection timed out. Your hosting provider (Render) may be blocking port ${credentials.smtpPort || 465}. Try port 587.`);
       }
       throw new Error(err.message || 'Email provider rejected the request.');
     }
