@@ -40,7 +40,7 @@ export class SmtpAdapter implements EmailProviderAdapter {
           socketTimeout: TIMEOUT_MS,
           // Force IPv4: Render cannot route IPv6 to Gmail SMTP (ENETUNREACH)
           family: 4,
-        });
+        } as any);
 
         transporter.verify()
           .then(() => { clearTimeout(timer); resolve({ isValid: true }); })
@@ -165,7 +165,7 @@ export class SmtpAdapter implements EmailProviderAdapter {
       tls: { rejectUnauthorized: false },
       // Force IPv4: Render cannot route IPv6 to Gmail SMTP (ENETUNREACH)
       family: 4,
-    });
+    } as any);
 
     try {
       const info = await transporter.sendMail({
