@@ -29,6 +29,7 @@ import { AdminLayout } from './layouts/AdminLayout';
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage';
 import { AdminUsersPage } from './pages/admin/AdminUsersPage';
 import { AdminCampaignsPage } from './pages/admin/AdminCampaignsPage';
+import { wakeUpServer } from './utils/api-client';
 
 // Support Integration
 import { SupportPage } from './pages/SupportPage';
@@ -43,7 +44,13 @@ const AppContent: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showGhostMode, setShowGhostMode] = useState(true);
   const [theme, setTheme] = useState<'ethereal' | 'glass'>('ethereal');
+  const [serverReady, setServerReady] = useState(false);
   const location = useLocation();
+
+  // Warm up the Render server as soon as the app loads
+  useEffect(() => {
+    wakeUpServer().finally(() => setServerReady(true));
+  }, []);
 
   useEffect(() => {
     document.body.className = `theme-${theme}`;
@@ -73,6 +80,13 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="flex h-screen w-full overflow-hidden relative">
+      {/* Server wake-up banner — shown until first ping completes */}
+      {!serverReady && (
+        <div className="fixed top-0 inset-x-0 z-[200] bg-amber-500 text-white text-center text-xs font-semibold py-1.5 flex items-center justify-center gap-2">
+          <span className="inline-block w-2 h-2 bg-white rounded-full animate-pulse"></span>
+          Connecting to server — please wait a moment...
+        </div>
+      )}
       {/* Global Helper Components */}
       <GhostStatus isVisible={showGhostMode} />
       <Toaster position="top-right" />

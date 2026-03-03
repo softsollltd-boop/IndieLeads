@@ -2,7 +2,7 @@ import axios from 'axios';
 
 /**
  * IndieLeads API Client
- * Logic hardened for production with unified response handling.
+ * Hardened for PaaS cold-start environments (Render free tier).
  */
 const getBaseURL = () => {
   let envUrl = import.meta.env.VITE_API_URL;
@@ -23,14 +23,33 @@ const getBaseURL = () => {
   return `${window.location.protocol}//${host}:3000/api/v1`;
 };
 
+const BASE_URL = getBaseURL();
+
 const apiClient = axios.create({
-  baseURL: getBaseURL(),
-  timeout: 25000, // 25s — leaves room for SMTP+IMAP check (2x10s) plus network
+  baseURL: BASE_URL,
+  // 65s timeout — enough to survive a Render free-tier cold start (~40-60s)
+  timeout: 65000,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   }
 });
+
+/**
+ * Silently wake up the Render server before the user interacts.
+ * Call this once when the app loads. The server responds within ~60s after
+ * being spun down. By pinging on app load we ensure it's warm by the time
+ * the user clicks anything.
+ */
+export const wakeUpServer = async () => {
+  try {
+    const baseWithoutV1 = BASE_URL.replace('/api/v1', '');
+    await axios.get(`${baseWithoutV1}/`, { timeout: 65000 });
+    console.log('[API] Server is awake and ready.');
+  } catch {
+    console.log('[API] Warming up server...');
+  }
+};
 
 // Request Interceptor: Auth & Context Injection
 apiClient.interceptors.request.use((config) => {
@@ -44,7 +63,6 @@ apiClient.interceptors.request.use((config) => {
 // Response Interceptor: Standardization & Auth Guard
 apiClient.interceptors.response.use(
   (response) => {
-    // Automatically unwrap the 'data' field from the world-class API envelope
     if (response.data && response.data.data !== undefined) {
       return response.data;
     }
@@ -60,11 +78,10 @@ apiClient.interceptors.response.use(
       }
     }
 
-    // Structured Error Extraction
+    // Structured Error Extraction — surface exact backend message
     const responseData = error.response?.data;
-    const errorMessage = responseData?.error?.message || error.message;
+    const errorMessage = responseData?.message || responseData?.error?.message || error.message;
 
-    // Log error for developers
     console.error(`[API ERROR] ${error.config?.method?.toUpperCase()} ${error.config?.url}: ${errorMessage}`);
 
     return Promise.reject(error);
