@@ -16,7 +16,7 @@ COPY apps ./apps
 COPY packages ./packages
 
 # Install dependencies and build
-RUN npm install
+RUN npm install --legacy-peer-deps
 RUN npm run build
 
 # STEP 2: Runtime Stage
