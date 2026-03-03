@@ -34,6 +34,7 @@ ENV PORT=3000
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/apps/workers/dist ./apps/workers/dist
+COPY --from=builder /app/apps/web/dist ./apps/web/dist
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/prisma ./prisma
 COPY scripts/entrypoint.sh ./scripts/entrypoint.sh

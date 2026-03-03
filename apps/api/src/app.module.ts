@@ -1,6 +1,8 @@
 
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 import { ConfigModule } from './config/config.module';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { TenantMiddleware } from './common/middleware/tenant.middleware';
@@ -53,6 +55,10 @@ import { AdminModule } from './modules/admin/admin.module';
       ttl: 60000,
       limit: 100,
     }]),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '../../..', 'apps/web/dist'),
+      exclude: ['/api/(.*)'],
+    }),
   ],
   controllers: [AppController, HealthController],
   providers: [TenantContextService],
