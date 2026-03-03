@@ -47,14 +47,12 @@ export class InboxesService {
       dto.credentials.imapPort = 993;
     }
 
-    // Authenticate and validate protocol connectivity
-    const validation = dto.credentials.accessToken
-      ? { isValid: true }
-      : await this.smtpAdapter.validateCredentials(dto.credentials);
-
-    if (!validation.isValid) {
-      throw new BadRequestException(validation.error || `Authentication Failed: Protocol handshake rejected by ${dto.provider}. Verify app passwords and security settings.`);
-    }
+    // NOTE: We intentionally skip live SMTP/IMAP validation here.
+    // Cloud PaaS providers (Render, Railway, Fly.io) block outbound SMTP ports (465/587/993)
+    // to prevent spam abuse. A live connection test would always time out.
+    // Instead, credentials are saved and validated on first actual send.
+    // Invalid credentials will show up as 'disconnected' on the health check page.
+    this.logger.log(`Skipping live SMTP check (blocked by PaaS firewall) for: ${dto.email}`);
 
     // Automated Domain Management
     const domainName = dto.email.split('@')[1];
