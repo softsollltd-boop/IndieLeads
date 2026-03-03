@@ -2,25 +2,18 @@ import axios from 'axios';
 
 /**
  * IndieLeads API Client
- * Hardened for PaaS cold-start environments (Render free tier).
+ * Enterprise-grade unified architecture resolution.
  */
 const getBaseURL = () => {
-  let envUrl = import.meta.env.VITE_API_URL;
+  const envUrl = import.meta.env.VITE_API_URL;
   if (envUrl) {
-    envUrl = envUrl.replace(/\/$/, '');
-    const apiPrefixIdx = envUrl.indexOf('/api/v1');
-    if (apiPrefixIdx !== -1) {
-      envUrl = envUrl.substring(0, apiPrefixIdx + 7);
-    } else {
-      envUrl = `${envUrl}/api/v1`;
-    }
-    return envUrl;
+    let url = envUrl.replace(/\/$/, '');
+    return url.includes('/api/v1') ? url : `${url}/api/v1`;
   }
 
-  if (typeof window === 'undefined') return 'http://localhost:3000/api/v1';
-
-  const host = window.location.hostname;
-  return `${window.location.protocol}//${host}:3000/api/v1`;
+  // Unified Build Fallback: Use relative path. 
+  // This is the most reliable way to connect in a single-container architecture.
+  return '/api/v1';
 };
 
 const BASE_URL = getBaseURL();
