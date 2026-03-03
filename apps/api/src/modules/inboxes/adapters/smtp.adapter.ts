@@ -30,6 +30,8 @@ export class SmtpAdapter implements EmailProviderAdapter {
           connectionTimeout: TIMEOUT_MS,
           greetingTimeout: TIMEOUT_MS,
           socketTimeout: TIMEOUT_MS,
+          // Force IPv4: Render cannot route IPv6 to Gmail SMTP (ENETUNREACH)
+          family: 4,
         });
 
         transporter.verify()
@@ -145,6 +147,8 @@ export class SmtpAdapter implements EmailProviderAdapter {
       greetingTimeout: 10000,
       socketTimeout: 10000,
       tls: { rejectUnauthorized: false },
+      // Force IPv4: Render cannot route IPv6 to Gmail SMTP (ENETUNREACH)
+      family: 4,
     });
 
     try {
@@ -169,8 +173,8 @@ export class SmtpAdapter implements EmailProviderAdapter {
       if (msg.includes('invalid login') || msg.includes('535') || msg.includes('authentication') || msg.includes('credentials')) {
         throw new Error('Invalid credentials. Make sure you are using a Gmail App Password, not your regular account password.');
       }
-      if (msg.includes('econnrefused') || msg.includes('enotfound') || msg.includes('getaddrinfo')) {
-        throw new Error(`Cannot reach SMTP server at ${credentials.smtpHost}:${credentials.smtpPort}. Check your host settings.`);
+      if (msg.includes('econnrefused') || msg.includes('enotfound') || msg.includes('getaddrinfo') || msg.includes('enetunreach')) {
+        throw new Error(`Cannot reach SMTP server at ${credentials.smtpHost || 'smtp.gmail.com'}. Check your host settings or try a different port.`);
       }
       if (msg.includes('timeout') || msg.includes('etimeout')) {
         throw new Error('SMTP connection timed out. Your hosting provider may be blocking outbound email ports.');
